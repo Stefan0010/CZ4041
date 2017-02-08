@@ -14,3 +14,9 @@ Course project private repository
 ## First step
 1. Download and extract from Kaggle `train.csv`, `test.csv`, and `store.csv` to data/ directory.
 2. **(Important)** Extract `merged.tar.gz` to data/
+
+## Note
+* **(Important)** `src/vis.py` and `src/merge.py` are outdated/unfinished, use `src/vis.ipynb`, `src/merge.ipynb` and `src/prep.ipynb` instead!
+ * `src/vis.ipynb`: for viz
+ * `src/merge.ipynb`: for cleaning and merging `train.csv` with `store.csv`
+ * `src/prep.ipynb`: for cleaning and merging `test.csv` with `store.csv`
