@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 
 # matplotlib.style.use('ggplot')
 
+# plt.rcParams["figure.figsize"] = (16, 9)
+
+print 'Fetching important packages'
+
 data_dir = 'data/'
 
 s_args = sys.argv[1:]
@@ -27,25 +31,58 @@ def strtodate(s):
 
 epoch = datetime.utcfromtimestamp(0)
 
+print 'Get something set up'
+
 train_csvpath = os.path.join(data_dir, 'train.csv')
 train_data = pd.read_csv(train_csvpath,
     dtype={
         'Store': int,
         'DayOfWeek': int,
-        'Sales': int,
+        'Sales': float,
+        'Open': int,
         'Customers': int,
         'Promo': int,
         'StateHoliday': str,
         'SchoolHoliday': int,
     },
     parse_dates=['Date'],
-    date_parser=strtodate
-    )
+    date_parser=strtodate)
 
+# Sort ascendingly according to date and store number
 train_data.sort_values(['Date', 'Store'],
     axis=0,
     inplace=True,
     ascending=True)
+
+print '\'train.csv\' loaded into pandas'
+
+print 'Modifying \'train.csv\' for easier processing'
+
+train_data.insert(len(train_data.columns),
+    'StateHoliday_0',
+    (train_data['StateHoliday'] == '0').astype(int, copy=False))
+
+train_data.insert(len(train_data.columns),
+    'StateHoliday_a',
+    (train_data['StateHoliday'] == 'a').astype(int, copy=False))
+
+train_data.insert(len(train_data.columns),
+    'StateHoliday_b',
+    (train_data['StateHoliday'] == 'b').astype(int, copy=False))
+
+train_data.insert(len(train_data.columns),
+    'StateHoliday_c',
+    (train_data['StateHoliday'] == 'c').astype(int, copy=False))
+
+train_data.insert(len(train_data.columns),
+    'Weekends',
+    (5 <= train_data['DayOfWeek']).astype(int, copy=False))
+
+train_data.insert(len(train_data.columns),
+    'Weekdays',
+    (train_data['DayOfWeek'] < 5).astype(int, copy=False))
+
+print train_data.iloc[:5]
 
 def get_sma(arr, n=30):
     sz  = arr.size
@@ -61,47 +98,77 @@ def get_sma(arr, n=30):
 
     return SMA
 
+print 'get_sma() is used to calculate Simple Moving Average'
+
 num_stores = 1115
 for i in range(1, 2):
-    filtered = train_data[
-        (train_data['Store']==i) & (train_data['Open']==1)][
-        ['DayOfWeek', 'Date', 'Sales', 'Customers', 'Promo',
-        'StateHoliday', 'SchoolHoliday']]
+    filtered_all = train_data[train_data['Store'] == i][
+        ['DayOfWeek', 'Date', 'Sales', 'Customers',
+        'Promo', 'StateHoliday', 'SchoolHoliday', 'Open', 'Weekends', 'Weekdays',
+        'StateHoliday_0', 'StateHoliday_a', 'StateHoliday_b', 'StateHoliday_c']]
 
-    dates   = filtered['Date']
-    sales   = filtered['Sales']
-    promos  = filtered['Promo']
-
-    sales_promos_pair = filtered[['Sales', 'Promo']]
+    filtered_open = train_data[(train_data['Store'] == i) &
+        (train_data['Open'] == 1)][['DayOfWeek', 'Date', 'Weekends',
+        'Sales', 'Customers', 'Promo', 'StateHoliday', 'SchoolHoliday', 'Weekdays',
+        'StateHoliday_0', 'StateHoliday_a', 'StateHoliday_b', 'StateHoliday_c']]
 
     for j in range(0, 3):
         year = 2013 + j
 
-        mask        = (dates.dt.year == year).as_matrix()
-        mask_wp     = ((dates.dt.year == year) & (promos == 1)).as_matrix()
-        dates_allyr = dates[mask].as_matrix()
-        sales_allyr = sales[mask].as_matrix()
-        promos_allyr = promos[mask].as_matrix()
+        filtered_all_yrly = filtered_all[filtered_all['Date'].dt.year == year]
+        filtered_open_yrly = filtered_open[filtered_open['Date'].dt.year == year]
+        
+        impt_feats_all = filtered_all_yrly[['Sales', 'Promo',
+            'Customers', 'Open', 'Weekends', 'Weekdays', 'SchoolHoliday',
+            'StateHoliday_0', 'StateHoliday_a', 'StateHoliday_b', 'StateHoliday_c']]
 
-        dates_wp    = dates[mask_wp].as_matrix()
-        sales_wp    = sales[mask_wp].as_matrix()
+        corrmat_labls = list(impt_feats_all)
+        corrmat = impt_feats_all.corr()
 
-        SMA21 = get_sma(sales_allyr, n=21)
-        sales_promos_corrmat = sales_promos_pair[mask].corr()
+        dates_all = filtered_all_yrly['Date'].as_matrix()
+        dates_open = filtered_open_yrly['Date'].as_matrix()
+        dates_promo = filtered_open_yrly.loc[filtered_open_yrly['Promo'] == 1, 'Date'].as_matrix()
+        dates_sch = filtered_all_yrly.loc[filtered_all_yrly['SchoolHoliday'] == 1, 'Date'].as_matrix()
+        
+        wkdays = filtered_all_yrly.loc[filtered_all_yrly['Weekdays'] == 1, 'Date'].as_matrix()
+        wkends = filtered_all_yrly.loc[filtered_all_yrly['Weekends'] == 1, 'Date'].as_matrix()
 
-        plt.clf()
+        promos_open = filtered_open_yrly['Promo'].as_matrix()
+        sales_open = filtered_open_yrly['Sales'].as_matrix()
+        customers_open = filtered_open_yrly['Customers'].as_matrix()
+        SMA7 = get_sma(sales_open, n=7)
+        SMA21 = get_sma(sales_open, n=21)
+
+        y_min = 0
+        y_max = sales_open.max()
+
         plt.figure(1)
-        ax = plt.subplot(1, 1, 1)
-        plt.fill_between(dates_allyr, 0, sales_allyr.max(), where=promos_allyr > 0, interpolate=False, zorder=0, alpha=0.67, facecolor='yellow')
-        plt.plot(dates_allyr, sales_allyr, '-bx', zorder=1)
-        plt.plot(dates_allyr, SMA21, '-rx', zorder=2)
-        plt.scatter(dates_wp, sales_wp, marker='o', c='magenta', s=25, zorder=3)
-        plt.xlim((dates_allyr[0], dates_allyr[-1]))
-        plt.ylim((0, sales_allyr.max()))
-        plt.subplots_adjust(top=1., bottom=0.025, right=1., left=0.025, wspace=0., hspace=0.)
-
-        fig = plt.figure(2)
+        plt.subplot(1, 1, 1)
+        plt.vlines(wkdays, 0., y_max/2., color='#cccccc', zorder=-1)
+        plt.vlines(wkends, y_max/2., y_max, color='yellow', zorder=0)
+        plt.plot(dates_open, sales_open, '-b', zorder=1)
+        plt.plot(dates_open, SMA21, '-r', zorder=2)
+        plt.plot(dates_open, SMA7, '-g', zorder=3)
+        plt.plot(dates_open, customers_open, '-c', zorder=4)
+        plt.xlim((dates_all[0], dates_all[-1]))
+        plt.ylim((y_min, y_max))
+        plt.subplots_adjust(left=0.025, bottom=0., right=1., top=0.975, wspace=0., hspace=0.)
+        
+        plt.figure(2)
+        plt.subplot(1, 1, 1)
+        plt.vlines(dates_promo, y_max/2., y_max, color='yellow')
+        plt.vlines(dates_sch, 0., y_max/2., color='#333333')
+        plt.plot(dates_open, sales_open, '-b', zorder=3)
+        plt.plot(dates_open, customers_open, '-c', zorder=4)
+        plt.xlim((dates_all[0], dates_all[-1]))
+        plt.ylim((y_min, y_max))
+        plt.subplots_adjust(left=0.025, bottom=0., right=1., top=0.975, wspace=0., hspace=0.)
+        
+        fig = plt.figure(3)
         ax  = fig.add_subplot(1, 1, 1)
-        cax = ax.matshow(sales_promos_corrmat, cmap='Reds')
-        fig.colorbar(cax, orientation='horizontal')
+        cax = ax.matshow(corrmat, cmap='bwr', vmin=-1., vmax=1.)
+        plt.xticks(range(len(corrmat_labls)), corrmat_labls, rotation=60)
+        plt.yticks(range(len(corrmat_labls)), corrmat_labls)
+        fig.colorbar(cax, orientation='vertical')
+        plt.subplots_adjust(left=0.025, bottom=0., right=1., top=0.975, wspace=0., hspace=0.)
         plt.show()
