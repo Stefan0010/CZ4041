@@ -93,3 +93,4 @@ ENV/
 *.zip
 *.tar.gz
 !merged.tar.gz
+!splitted.tar.gz
