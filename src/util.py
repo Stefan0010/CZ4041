@@ -29,7 +29,7 @@ def load_train_data(data_dir='data/'):
     return data
 
 def load_splitted_data(data_dir='data/'):
-    csv_path = os.path.join(data_dir, 'split_1000.csv')
+    csv_path = os.path.join(data_dir, '1000_split.csv')
     split_data = pd.read_csv(csv_path,
         dtype={
             'StateHoliday': str,
@@ -37,7 +37,7 @@ def load_splitted_data(data_dir='data/'):
         parse_dates=['Date'],
         date_parser=strtodate)
 
-    csv_path2 = os.path.join(data_dir, 'split_115.csv')
+    csv_path2 = os.path.join(data_dir, '115_split.csv')
     split_data2 = pd.read_csv(csv_path2,
         dtype={
             'StateHoliday': str,
