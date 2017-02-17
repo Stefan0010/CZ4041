@@ -46,7 +46,7 @@ trainDataX = pd.read_csv(
 				sep = ',', 
 				header = 0, 
 				dtype = {'StateHoliday' : np.dtype('a1')},
-				usecols = [i for i in range(0,25) if i != 2 and i != 3 and i != 7]
+				usecols = [i for i in range(0,25) if i != 0 and i != 2 and i != 3 and i != 7]
 				).values
 trainDataY = pd.read_csv(trainDataPath, sep = ',', header = 0, usecols=[3]).values.flatten()
 
@@ -55,7 +55,7 @@ testDataX = pd.read_csv(
 				sep = ',', 
 				header = 0, 
 				dtype = {'StateHoliday' : np.dtype('a1')},
-				usecols = [i for i in range(0,25) if i != 2 and i != 3 and i != 7]
+				usecols = [i for i in range(0,25) if i != 0 and i != 2 and i != 3 and i != 7]
 				).values
 testDataY = pd.read_csv(valDataPath, sep = ',', header = 0, usecols=[3]).values.flatten()
 
@@ -76,6 +76,6 @@ params = {
 # rmse = run(trainDataX, trainDataY, testDataX, testDataY, params)
 
 # KFOLD
-k = 100
+k = 5
 rmse = runKFold(trainDataX, trainDataY, testDataX, testDataY, params, k)
 print('RMSE : {}'.format(rmse))
