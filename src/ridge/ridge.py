@@ -7,6 +7,17 @@ import time
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error as mse
 
+def rmspe(yPred, yActual):
+	filtr = (yActual != 0.).ravel()
+
+	yActual = yActual[filtr].ravel()
+	yPred = yPred[filtr].ravel()
+
+	spe = ( (yActual - yPred) / yActual)**2
+	rmspe = math.sqrt(np.mean(spe))
+
+	return rmspe
+
 def run(trainDataX, trainDataY, testDataX, testDataY, params):
 	model = linear_model.Ridge(alpha = params['alpha'])
 
@@ -19,7 +30,7 @@ def run(trainDataX, trainDataY, testDataX, testDataY, params):
 	print('Time Elapsed : {} seconds'.format(endTime - startTime))
 
 	yPredict = model.predict(testDataX)
-	return math.sqrt(mse(testDataY, yPredict))
+	return rmspe(yPredict, testDataY)
 
 def runKFold(trainDataX, trainDataY, testDataX, testDataY, params, k):
 	model = linear_model.RidgeCV(cv = k)
@@ -33,7 +44,7 @@ def runKFold(trainDataX, trainDataY, testDataX, testDataY, params, k):
 	print('Time Elapsed : {} seconds'.format(endTime - startTime))
 
 	yPredict = model.predict(testDataX)
-	return math.sqrt(mse(testDataY, yPredict))
+	return rmspe(yPredict, testDataY)
 
 # LOAD DATA
 # extract both files to "splitted" folder OR
@@ -73,9 +84,9 @@ params = {
 }
 
 # NORMAL
-# rmse = run(trainDataX, trainDataY, testDataX, testDataY, params)
+rmspe = run(trainDataX, trainDataY, testDataX, testDataY, params)
 
 # KFOLD
-k = 5
-rmse = runKFold(trainDataX, trainDataY, testDataX, testDataY, params, k)
-print('RMSE : {}'.format(rmse))
+# k = 5
+# rmspe = runKFold(trainDataX, trainDataY, testDataX, testDataY, params, k)
+print('RMSPE : {}'.format(rmspe))
