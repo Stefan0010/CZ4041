@@ -1,0 +1,134 @@
+name: "LSTM"
+
+# Input layer for training phase
+layer {
+  name: "data"
+  type: "Input"
+  top: "data"
+  include: {
+    phase: TRAIN
+  }
+  input_param: {
+    shape: {
+      dim: 100
+      dim: 1
+      dim: 1
+    }
+  }
+}
+layer {
+  name: "clip"
+  type: "Input"
+  top: "clip"
+  include: {
+    phase: TRAIN
+  }
+  input_param: {
+    shape: {
+      dim: 100
+      dim: 1
+    }
+  }
+}
+layer {
+  name: "label"
+  type: "Input"
+  top: "label"
+  include: {
+    phase: TRAIN
+  }
+  input_param: {
+    shape: {
+      dim: 100
+      dim: 1
+    }
+  }
+}
+
+# Input layer for testing phase
+layer {
+  name: "data"
+  type: "Input"
+  top: "data"
+  include: {
+    phase: TEST
+  }
+  input_param: {
+    shape: {
+      dim: 1
+      dim: 1
+      dim: 1
+    }
+  }
+}
+layer {
+  name: "clip"
+  type: "Input"
+  top: "clip"
+  include: {
+    phase: TEST
+  }
+  input_param: {
+    shape: {
+      dim: 1
+      dim: 1
+    }
+  }
+}
+
+# LSTM layer
+layer {
+  name: "lstm1"
+  type: "LSTM"
+  bottom: "data"
+  bottom: "clip"
+  top: "lstm1"
+
+  recurrent_param {
+    num_output: 512
+    weight_filler {
+      type: "gaussian"
+      std: 0.1
+#      type: "uniform"
+#      min: -0.2
+#      max: 0.2
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+# Dense layer after LSTM
+layer {
+  name: "ip1"
+  type: "InnerProduct"
+  bottom: "lstm1"
+  top: "ip1"
+
+  inner_product_param {
+    num_output: 1
+    weight_filler {
+#      type: "xavier"
+#      variance_norm: FAN_IN
+#      type: "gaussian"
+#      std: 0.1
+      type: "uniform"
+      min: -0.2
+      max: 0.2
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+# Loss layer
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "ip1"
+  bottom: "label"
+  top: "loss"
+  include: { phase: TRAIN }
+}

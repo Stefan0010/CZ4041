@@ -89,7 +89,7 @@ ENV/
 .ropeproject
 
 # Extras
-*.csv
+!.csv
 *.zip
 *.tar.gz
 !merged.tar.gz
