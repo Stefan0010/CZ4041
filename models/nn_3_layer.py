@@ -3,8 +3,10 @@ import sys
 import caffe
 import numpy as np
 import pandas as pd
-from src import util
 import matplotlib.pyplot as plt
+
+sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
+from src import util
 
 solver = caffe.get_solver('nn_3_layer_solver.prototxt')
 

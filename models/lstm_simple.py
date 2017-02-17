@@ -3,8 +3,10 @@ import sys
 import caffe
 import numpy as np
 import pandas as pd
-from src import util
 import matplotlib.pyplot as plt
+
+sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
+from src import util
 
 solver = caffe.get_solver('lstm_simple_solver.prototxt')
 
@@ -65,30 +67,32 @@ net = solver.net
 test_net = solver.test_nets[0]
 
 # Just a peek
-s = store_ids[0]
-X, y = stores[s]
-ts = X.shape[0]
-preds = np.zeros(ts)
-plt.figure(1)
-plt.subplots_adjust(left=0.025, bottom=0.025, right=1.0, top=1.0, wspace=0., hspace=0.)
-for t in range(ts):
-    test_net.blobs['data'].data[0] = X[t]
-    test_net.blobs['cont'].data[0] = t > 0
-    preds[t] = test_net.forward()['ip1'][0]
-plt.xlim([0, ts])
-y_min=min(preds.min(), y.min())
-y_max=max(preds.max(), y.max())
-plt.ylim([y_min, y_max])
-plt.plot(np.arange(ts), y, '-b')
-plt.plot(np.arange(ts), preds, '-r')
-plt.show()
+# s = store_ids[0]
+# X, y = stores[s]
+# ts = X.shape[0]
+# preds = np.zeros(ts)
+# plt.figure(1)
+# plt.subplots_adjust(left=0.025, bottom=0.025, right=1.0, top=1.0, wspace=0., hspace=0.)
+# for t in range(ts):
+#     test_net.blobs['data'].data[0] = X[t]
+#     test_net.blobs['cont'].data[0] = t > 0
+#     preds[t] = test_net.forward()['ip1'][0]
+# plt.xlim([0, ts])
+# y_min=min(preds.min(), y.min())
+# y_max=max(preds.max(), y.max())
+# plt.ylim([y_min, y_max])
+# plt.plot(np.arange(ts), y, '-b')
+# plt.plot(np.arange(ts), preds, '-r')
+# plt.show()
 
-raw_input("Start?")
+# raw_input("Start?")
 
 # Start training
 num_epoch = 1
+losses = []
 for epoch in range(num_epoch):
     for store_id in store_ids:
+    # for store_id in (store_ids[0], ):
         X, y = stores[store_id]
         ts = X.shape[0]
         for t in range(ts):
@@ -97,7 +101,17 @@ for epoch in range(num_epoch):
             net.blobs['target'].data[0] = y[t]
             solver.step(1)
 
-# Peek again after prediction
+            losses.append(net.blobs['loss'].data.item(0))
+
+losses = np.array(losses, dtype=float)
+plt.figure(1)
+plt.subplots_adjust(left=0.025, bottom=0.025, right=1.0, top=1.0, wspace=0., hspace=0.)
+plt.xlim([0, len(losses)])
+plt.ylim([losses.min(), losses.max()])
+plt.plot(np.arange(len(losses))[::5], losses[::5], '-b')
+plt.show()
+
+# Peek again after training
 s = store_ids[0]
 X, y = stores[s]
 ts = X.shape[0]
@@ -116,3 +130,7 @@ plt.ylim([y_min, y_max])
 plt.plot(np.arange(ts), y, '-b')
 plt.plot(np.arange(ts), preds, '-r')
 plt.show()
+
+L = ((preds.ravel() - y.ravel())**2).sum() * sales_max * sales_max / 4.
+print 'MSE : %.9f' % L
+print 'RMSE: %.9f' % np.sqrt(L)
