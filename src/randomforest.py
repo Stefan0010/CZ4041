@@ -39,13 +39,19 @@ for i in range(len(n)):
 
 	results = rf.predict(valArr)
 
-	print ("number of trees =  " + str(n[i]))
-	for i in range (50):
-		print (str(i) + "  valRes:  " + str(valRes[i]))
-		print (str(i) + "  results:  " + str(results[i]))
+	# print ("number of trees =  " + str(n[i]))
+	# for i in range (50):
+	# 	print (str(i) + "  valRes:  " + str(valRes[i]))
+	# 	print (str(i) + "  results:  " + str(results[i]))
 
 	error = sqrt(mean_squared_error(valRes, results))
 	print (error)
+
+	filtr = (valRes!=0.).ravel()
+	temp1 = valRes[filtr].ravel()
+	temp2 = results[filtr].ravel()
+	rmspe = np.sqrt( np.sum(((temp1-temp2)/temp1)**2/len(temp1)) )
+	print rmspe
 	print """"""""""""""""""""
 
 

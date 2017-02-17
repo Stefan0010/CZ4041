@@ -88,11 +88,11 @@ test_net = solver.test_nets[0]
 # raw_input("Start?")
 
 # Start training
-num_epoch = 1
+num_epoch = 25
 losses = []
 for epoch in range(num_epoch):
-    for store_id in store_ids:
-    # for store_id in (store_ids[0], ):
+    # for store_id in store_ids:
+    for store_id in (store_ids[0], ):
         X, y = stores[store_id]
         ts = X.shape[0]
         for t in range(ts):
@@ -131,6 +131,5 @@ plt.plot(np.arange(ts), y, '-b')
 plt.plot(np.arange(ts), preds, '-r')
 plt.show()
 
-L = ((preds.ravel() - y.ravel())**2).sum() * sales_max * sales_max / 4.
-print 'MSE : %.9f' % L
-print 'RMSE: %.9f' % np.sqrt(L)
+L = np.sqrt((((preds.ravel() - y.ravel()) / y.ravel())**2).sum()/ts)
+print 'RMSPE : %.9f' % L
