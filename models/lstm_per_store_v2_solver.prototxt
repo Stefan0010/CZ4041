@@ -1,0 +1,10 @@
+net: "lstm_per_store_v2.prototxt" 
+test_iter: 1
+test_interval: 100000000
+type: "Nesterov"
+base_lr: 0.001
+momentum: 0.99
+lr_policy: "fixed"
+display: 10
+average_loss: 10
+solver_mode: GPU

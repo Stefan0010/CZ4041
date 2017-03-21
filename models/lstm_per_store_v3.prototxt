@@ -1,4 +1,4 @@
-name: "LSTM Simple"
+name: "LSTM Simple per Store v2"
 
 layer {
     name: "data"
@@ -7,8 +7,7 @@ layer {
     input_param {
         shape: {
             dim: 1
-            dim: 1
-            dim: 26
+            dim: 19
         }
     }
 }
@@ -41,17 +40,16 @@ layer {
 }
 
 layer {
-    name: "lstm1"
-    type: "LSTM"
+    name: "ip1"
+    type: "InnerProduct"
     bottom: "data"
-    bottom: "cont"
-    top: "lstm1"
+    top: "ip1"
 
-    recurrent_param {
-        num_output: 256
+    inner_product_param {
+        num_output: 128
         weight_filler {
-            type: "gaussian"
-            std: 0.1
+            type: "xavier",
+            variance_norm: AVERAGE
         }
         bias_filler {
             type: "constant"
@@ -60,15 +58,66 @@ layer {
 }
 
 layer {
-    name: "ip1"
+    name: "reshape1",
+    type: "Reshape",
+    bottom: "ip1",
+    top: "reshape1",
+    reshape_param {
+        shape {
+            dim: 1
+            dim: 1
+            dim: 128
+        }
+    }
+}
+
+layer {
+    name: "lstm1"
+    type: "LSTM"
+    bottom: "reshape1"
+    bottom: "cont"
+    top: "lstm1"
+
+    recurrent_param {
+        num_output: 128
+        weight_filler {
+            type: "gaussian",
+            std: 0.25,
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "ip2"
     type: "InnerProduct"
     bottom: "lstm1"
-    top: "ip1"
+    top: "ip2"
+
+    inner_product_param {
+        num_output: 128
+        weight_filler {
+            type: "xavier",
+            variance_norm: AVERAGE
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "output"
+    type: "InnerProduct"
+    bottom: "ip2"
+    top: "output"
 
     inner_product_param {
         num_output: 1
         weight_filler {
-            type: "xavier"
+            type: "xavier",
             variance_norm: AVERAGE
         }
         bias_filler {
@@ -80,7 +129,7 @@ layer {
 layer {
     name: "loss"
     type: "EuclideanLoss"
-    bottom: "ip1"
+    bottom: "output"
     bottom: "target"
     top: "loss"
     include {
