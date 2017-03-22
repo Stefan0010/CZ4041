@@ -1,10 +1,10 @@
-net: "lstm_per_store.prototxt" 
+net: "lstmv3.prototxt" 
 test_iter: 1
 test_interval: 100000000
 type: "Nesterov"
-base_lr: 0.001
-momentum: 0.99
+base_lr: 0.000001
+momentum: 0.999
 lr_policy: "fixed"
-display: 10
+display: 500
 average_loss: 500
 solver_mode: GPU

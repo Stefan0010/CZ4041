@@ -1,0 +1,90 @@
+\documentclass[pdftex,12pt,a4paper]{report}
+
+\usepackage[top=3cm, bottom=3cm, left=3.5cm, right=3cm]{geometry}
+
+% graphics images
+\usepackage[pdftex]{graphicx}
+\usepackage[toc,page]{appendix}
+\usepackage{slashbox}
+% 1.5 line spacing
+\usepackage{setspace}
+\usepackage{tabu}
+\usepackage{tabularx}
+\onehalfspacing
+% maths symbols
+\usepackage{amsmath}
+
+% table package
+\usepackage{multirow}
+
+% citation style
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{amsfonts}
+
+
+\usepackage{tikz,colortbl}
+\usetikzlibrary{calc}
+\usepackage{zref-savepos}
+
+\usepackage[bf,small,tableposition=top]{caption}
+\usepackage{subfig}
+\usepackage{float}
+\usepackage{url}
+
+% my package
+\usepackage{hyperref}
+\usepackage{listings}
+
+% my def
+\definecolor{light-gray}{HTML}{CCCCCC}
+
+\begin{document}
+\begin{titlepage}
+	\begin{center}
+		
+		% school logo
+		\includegraphics[width=1\textwidth]{./ntu_logo.png}
+		\\[5cm]
+		
+		% project title
+		\uppercase{\textbf{CZ4041 -- MACHINE LEARNING}}
+		\\[5cm]
+		
+		% submited by ...
+		\uppercase{
+			\textbf{
+				PETER
+		}}
+		
+		\vfill
+		
+		% Bottom of the page
+		\textsc{\bfseries SCHOOL OF COMPUTER ENGINEERING}
+		\\
+		\textbf{2016/17}
+		
+	\end{center}
+\end{titlepage}
+
+% abstract
+\setcounter{page}{1}
+\pagenumbering{roman}
+
+% table of content
+\tableofcontents
+\addcontentsline{toc}{chapter}{Contents}
+
+% list of tables
+\listoftables
+\addcontentsline{toc}{chapter}{List of Tables}
+
+% list of figures
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+
+% intro chapter
+\cleardoublepage
+\pagenumbering{arabic}
+\input{body.tex}
+
+\end{document}

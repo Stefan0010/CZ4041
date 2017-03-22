@@ -50,8 +50,8 @@ layer {
     recurrent_param {
         num_output: 128
         weight_filler {
-            type: "gaussian",
-            std: 0.3,
+            type: "gaussian"
+            std: 0.25
         }
         bias_filler {
             type: "constant"
