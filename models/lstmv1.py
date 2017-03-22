@@ -122,7 +122,8 @@ for store_id in store_ids:
     mat2 = temp_df.as_matrix().astype(float, copy=False)
 
     # -1 to 1 normalization
-    mat2 = mat2 * 2. - 1.
+    # Index 0 is submission id
+    mat2[:, 1:] = mat2[:, 1:] * 2. - 1.
 
     del temp_df
 
