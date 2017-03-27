@@ -1,0 +1,14 @@
+net: "lstmv2_1.prototxt"
+
+test_iter: 1
+test_interval: 100000000
+
+type: "RMSProp"
+rms_decay: 0.99
+base_lr: 0.001
+lr_policy: "fixed"
+
+display: 50
+average_loss: 50
+
+solver_mode: GPU

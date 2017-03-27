@@ -1,4 +1,4 @@
-name: "nn_simple"
+name: "LSTM Simple per Store v2"
 
 layer {
     name: "data"
@@ -6,8 +6,21 @@ layer {
     top: "data"
     input_param {
         shape: {
-            dim: 496
-            dim: 26
+            dim: 500
+            dim: 1
+            dim: 13
+        }
+    }
+}
+
+layer {
+    name: "cont"
+    type: "Input"
+    top: "cont"
+    input_param {
+        shape: {
+            dim: 500
+            dim: 1
         }
     }
 }
@@ -16,28 +29,29 @@ layer {
     name: "target"
     type: "Input"
     top: "target"
-    include {
+    include: {
         phase: TRAIN
     }
     input_param {
         shape: {
-            dim: 496
+            dim: 500
             dim: 1
         }
     }
 }
 
 layer {
-    name: "ip1"
-    type: "InnerProduct"
-    top: "ip1"
+    name: "lstm1"
+    type: "LSTM"
     bottom: "data"
+    bottom: "cont"
+    top: "lstm1"
 
-    inner_product_param {
-        num_output: 512
+    recurrent_param {
+        num_output: 64
         weight_filler {
-            type: "xavier"
-            variance_norm: AVERAGE
+            type: "gaussian"
+            std: 0.2
         }
         bias_filler {
             type: "constant"
@@ -46,16 +60,32 @@ layer {
 }
 
 layer {
-    name: "ip2"
+    name: "ip1"
     type: "InnerProduct"
-    top: "ip2"
+    bottom: "lstm1"
+    top: "ip1"
+
+    inner_product_param {
+        num_output: 64
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "output"
+    type: "InnerProduct"
     bottom: "ip1"
+    top: "output"
 
     inner_product_param {
         num_output: 1
         weight_filler {
             type: "xavier"
-            variance_norm: AVERAGE
         }
         bias_filler {
             type: "constant"
@@ -66,7 +96,7 @@ layer {
 layer {
     name: "loss"
     type: "EuclideanLoss"
-    bottom: "ip2"
+    bottom: "output"
     bottom: "target"
     top: "loss"
     include {

@@ -1,4 +1,4 @@
-name: "LSTM Simple per Store v2"
+name: "LSTM Simple"
 
 layer {
     name: "data"
@@ -6,9 +6,9 @@ layer {
     top: "data"
     input_param {
         shape: {
-            dim: 100
+            dim: 10000
             dim: 1
-            dim: 19
+            dim: 18
         }
     }
 }
@@ -19,7 +19,7 @@ layer {
     top: "cont"
     input_param {
         shape: {
-            dim: 100
+            dim: 10000
             dim: 1
         }
     }
@@ -34,24 +34,22 @@ layer {
     }
     input_param {
         shape: {
-            dim: 100
+            dim: 10000
             dim: 1
         }
     }
 }
 
 layer {
-    name: "lstm1"
-    type: "LSTM"
+    name: "ip1"
+    type: "InnerProduct"
     bottom: "data"
-    bottom: "cont"
-    top: "lstm1"
+    top: "ip1"
 
-    recurrent_param {
-        num_output: 128
+    inner_product_param {
+        num_output: 64
         weight_filler {
-            type: "gaussian"
-            std: 0.25
+            type: "xavier"
         }
         bias_filler {
             type: "constant"
@@ -60,13 +58,46 @@ layer {
 }
 
 layer {
-    name: "ip1"
+    name: "reshape1"
+    type: "Reshape"
+    bottom: "ip1"
+    top: "reshape1"
+
+    reshape_param {
+        shape {
+            dim: 2500
+            dim: 1
+            dim: 64
+        }
+    }
+}
+
+layer {
+    name: "lstm1"
+    type: "LSTM"
+    bottom: "reshape1"
+    bottom: "cont"
+    top: "lstm1"
+
+    recurrent_param {
+        num_output: 64
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "ip2"
     type: "InnerProduct"
     bottom: "lstm1"
-    top: "ip1"
+    top: "ip2"
 
     inner_product_param {
-        num_output: 128
+        num_output: 64
         weight_filler {
             type: "xavier"
         }
@@ -79,7 +110,7 @@ layer {
 layer {
     name: "output"
     type: "InnerProduct"
-    bottom: "ip1"
+    bottom: "ip2"
     top: "output"
 
     inner_product_param {

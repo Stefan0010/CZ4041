@@ -6,9 +6,9 @@ layer {
     top: "data"
     input_param {
         shape: {
+            dim: 10000
             dim: 1
-            dim: 1
-            dim: 26
+            dim: 18
         }
     }
 }
@@ -19,7 +19,7 @@ layer {
     top: "cont"
     input_param {
         shape: {
-            dim: 1
+            dim: 10000
             dim: 1
         }
     }
@@ -34,7 +34,7 @@ layer {
     }
     input_param {
         shape: {
-            dim: 1
+            dim: 10000
             dim: 1
         }
     }
@@ -48,10 +48,9 @@ layer {
     top: "lstm1"
 
     recurrent_param {
-        num_output: 128
+        num_output: 100
         weight_filler {
-            type: "gaussian"
-            std: 0.25
+            type: "xavier"
         }
         bias_filler {
             type: "constant"
@@ -60,15 +59,32 @@ layer {
 }
 
 layer {
-    name: "ip1"
+    name: "ip2"
     type: "InnerProduct"
     bottom: "lstm1"
-    top: "ip1"
+    top: "ip2"
+
+    inner_product_param {
+        num_output: 100
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "output"
+    type: "InnerProduct"
+    bottom: "ip2"
+    top: "output"
 
     inner_product_param {
         num_output: 1
         weight_filler {
-            type: "positive_unitball"
+            type: "xavier"
         }
         bias_filler {
             type: "constant"
@@ -79,7 +95,7 @@ layer {
 layer {
     name: "loss"
     type: "EuclideanLoss"
-    bottom: "ip1"
+    bottom: "output"
     bottom: "target"
     top: "loss"
     include {
