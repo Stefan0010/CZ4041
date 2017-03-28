@@ -110,6 +110,9 @@ def evaluate():
 
 	return True
 
+def createModel():
+	
+
 # MAIN
 # x_train, y_train_norm, x_test, y_test_norm = loadData()
 # model = linear_model.Lasso(alpha=1.0)
