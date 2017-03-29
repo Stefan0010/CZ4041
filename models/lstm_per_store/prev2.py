@@ -17,56 +17,72 @@ from src import util
 batch_size = 500
 
 # Load train & test data
-data_dir = '../data'
+data_dir = '../../data'
 
-train_data = util.load_train_data(data_dir)
-test_data = util.load_test_data(data_dir)
+traind = util.load_train_data(data_dir)
+testd = util.load_test_data(data_dir)
 
 # Sort
-train_data.sort_values(['Date', 'Store'], ascending=True, inplace=True)
-test_data.sort_values(['Date', 'Store'], ascending=True, inplace=True)
+traind.sort_values(['Date', 'Store'], ascending=True, inplace=True)
+testd.sort_values(['Date', 'Store'], ascending=True, inplace=True)
 
 # Drop all when stores are closed
-train_data = train_data[train_data['Open'] == 1]
-days_open = test_data['Open'] == 1
+traind = traind[traind['Open'] == 1]
+days_open = testd['Open'] == 1
 
 # Store
-store_ids = test_data['Store'].unique().astype(int, copy=False)
+store_ids = testd['Store'].unique().astype(int, copy=False)
 stores = {}
 
 # DayOfWeek
-train_data.loc[:, 'DayOfWeek'] = (train_data['DayOfWeek'] - 1.) / 6.
-test_data.loc[:, 'DayOfWeek'] = (test_data['DayOfWeek'] - 1.) / 6.
+traind.insert(len(traind.columns), 'Monday', traind['DayOfWeek'] == 1)
+traind.insert(len(traind.columns), 'Tuesday', traind['DayOfWeek'] == 2)
+traind.insert(len(traind.columns), 'Wednesday', traind['DayOfWeek'] == 3)
+traind.insert(len(traind.columns), 'Thursday', traind['DayOfWeek'] == 4)
+traind.insert(len(traind.columns), 'Friday', traind['DayOfWeek'] == 5)
+traind.insert(len(traind.columns), 'Saturday', traind['DayOfWeek'] == 6)
+traind.insert(len(traind.columns), 'Sunday', traind['DayOfWeek'] == 7)
+
+testd.insert(len(testd.columns), 'Monday', testd['DayOfWeek'] == 1)
+testd.insert(len(testd.columns), 'Tuesday', testd['DayOfWeek'] == 2)
+testd.insert(len(testd.columns), 'Wednesday', testd['DayOfWeek'] == 3)
+testd.insert(len(testd.columns), 'Thursday', testd['DayOfWeek'] == 4)
+testd.insert(len(testd.columns), 'Friday', testd['DayOfWeek'] == 5)
+testd.insert(len(testd.columns), 'Saturday', testd['DayOfWeek'] == 6)
+testd.insert(len(testd.columns), 'Sunday', testd['DayOfWeek'] == 7)
+
+del traind['DayOfWeek']
+del testd['DayOfWeek']
 
 # Date
 date_min = datetime(2013,  1,  1)
 date_max = datetime(2015,  9, 18)
 date_normer = float((date_max - date_min).days)
 
-train_data.insert(len(train_data.columns), 'Date_Norm', (train_data['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
-test_data.insert(len(test_data.columns), 'Date_Norm', (test_data['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
+traind.insert(len(traind.columns), 'Date_Norm', (traind['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
+testd.insert(len(testd.columns), 'Date_Norm', (testd['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
 
 # Sales
 for store_id in store_ids:
-    mask = train_data['Store'] == store_id
-    mean = train_data.loc[mask, 'Sales'].mean()
-    std = train_data.loc[mask, 'Sales'].std()
-    train_data.loc[mask, 'Sales'] = (train_data.loc[mask, 'Sales'] - mean) / std
+    mask = traind['Store'] == store_id
+    mean = traind.loc[mask, 'Sales'].mean()
+    std = traind.loc[mask, 'Sales'].std()
+    traind.loc[mask, 'Sales'] = (traind.loc[mask, 'Sales'] - mean) / std
     stores[store_id] = {
         'mean': mean,
         'std': std
     }
 
 # Customers
-del train_data['Customers']
+del traind['Customers']
 
 # Open
 
 # Promo
 
 # StateHoliday
-del train_data['StateHoliday']
-del test_data['StateHoliday']
+del traind['StateHoliday']
+del testd['StateHoliday']
 
 # SchoolHoliday
 
@@ -79,100 +95,103 @@ del test_data['StateHoliday']
 # StateHoliday_c
 
 # Weekends
+del traind['Weekends']
+del testd['Weekends']
 
 # Weekdays
+del traind['Weekdays']
+del testd['Weekdays']
 
 # StoreType_a
-del train_data['StoreType_a']
-del test_data['StoreType_a']
+del traind['StoreType_a']
+del testd['StoreType_a']
 
 # StoreType_b
-del train_data['StoreType_b']
-del test_data['StoreType_b']
+del traind['StoreType_b']
+del testd['StoreType_b']
 
 # StoreType_c
-del train_data['StoreType_c']
-del test_data['StoreType_c']
+del traind['StoreType_c']
+del testd['StoreType_c']
 
 # StoreType_d
-del train_data['StoreType_d']
-del test_data['StoreType_d']
+del traind['StoreType_d']
+del testd['StoreType_d']
 
 # Assortment_a
-del train_data['Assortment_a']
-del test_data['Assortment_a']
+del traind['Assortment_a']
+del testd['Assortment_a']
 
 # Assortment_b
-del train_data['Assortment_b']
-del test_data['Assortment_b']
+del traind['Assortment_b']
+del testd['Assortment_b']
 
 # Assortment_c
-del train_data['Assortment_c']
-del test_data['Assortment_c']
+del traind['Assortment_c']
+del testd['Assortment_c']
 
 # HasCompetition
+del traind['HasCompetition']
+del testd['HasCompetition']
 
 # CompetitionDistance
-max_compdist = train_data['CompetitionDistance'].max()
-train_data.loc[:, 'CompetitionDistance'] = train_data['CompetitionDistance'] / max_compdist
-test_data.loc[:, 'CompetitionDistance'] = test_data['CompetitionDistance'] / max_compdist
+del traind['CompetitionDistance']
+del testd['CompetitionDistance']
+
+# max_compdist = traind['CompetitionDistance'].max()
+# traind.loc[:, 'CompetitionDistance'] = traind['CompetitionDistance'] / max_compdist
+# testd.loc[:, 'CompetitionDistance'] = testd['CompetitionDistance'] / max_compdist
 
 # IsDoingPromo2
 
 for store_id in store_ids:
     # Drops store id
-    dfv = train_data.loc[train_data['Store'] == store_id]
-    x = dfv.drop(['Store', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
-    y = dfv['Sales'].as_matrix().astype(float, copy=False)
+    dfv = traind.loc[traind['Store'] == store_id]
+    xtrain = dfv.drop(['Store', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
+    ytrain = dfv['Sales'].as_matrix().astype(float, copy=False)
     del dfv
 
     # Tweaks for batched learning
-    assert len(x) == len(y)
-    prev_len = len(x)
+    assert len(xtrain) == len(ytrain)
+    prev_len = len(xtrain)
     num_rem = batch_size - prev_len % batch_size
-    x = np.insert(x, prev_len, x[:num_rem], 0)
-    y = np.insert(y, prev_len, y[:num_rem], 0)
-    cont = np.ones(len(x))
-    cont[0] = 0
-    cont[prev_len] = 0
+    xtrain = np.insert(xtrain, prev_len, xtrain[:num_rem], 0)
+    ytrain = np.insert(ytrain, prev_len, ytrain[:num_rem], 0)
+    cont_train = np.ones(len(xtrain))
+    cont_train[0] = 0
+    cont_train[prev_len] = 0
 
-    stores[store_id]['x'] = x
-    stores[store_id]['y'] = y
-    stores[store_id]['cont'] = cont
+    stores[store_id]['xtrain'] = xtrain
+    stores[store_id]['ytrain'] = ytrain
+    stores[store_id]['cont_train'] = cont_train
 
     # Process its respective test data
-    tempdf = test_data.loc[days_open & (test_data['Store'] == store_id)]
-    xtest = tempdf.drop(['Id', 'Store', 'Date', 'Open'], axis=1).as_matrix().astype(float, copy=False)
-    submid = tempdf['Id'].as_matrix().astype(int, copy=False)
-    del tempdf
+    dfv = testd.loc[days_open & (testd['Store'] == store_id)]
+    xtest = dfv.drop(['Id', 'Store', 'Date', 'Open'], axis=1).as_matrix().astype(float, copy=False)
+    submid = dfv['Id'].as_matrix().astype(int, copy=False)
+    del dfv
 
     # Tweak for batched learning
     prev_len = len(xtest)
     num_rem = batch_size - prev_len % batch_size
 
-    # Holy fuck
-    if prev_len < num_rem:
-        cont_test = np.ones(batch_size)
-        cont_test[0] = 0
-        for i in range(0, num_rem, prev_len):
-            xtest = np.insert(xtest, len(xtest), xtest[:min(prev_len, num_rem - i)], 0)
-            cont_test[prev_len + i] = 0
-
-    else:
-        xtest = np.insert(xtest, len(xtest), xtest[:num_rem], 0)
-        cont_test = np.ones(len(xtest))
-        cont_test[0] = 0
-        cont_test[prev_len] = 0
+    cont_test = np.ones(batch_size)
+    cont_test[0] = 0
+    for i in range(0, num_rem, prev_len):
+        xtest = np.insert(xtest, len(xtest), xtest[:min(prev_len, num_rem - i)], 0)
+        cont_test[prev_len + i] = 0
 
     stores[store_id]['xtest'] = xtest
     stores[store_id]['submid'] = submid
     stores[store_id]['cont_test'] = cont_test
 
-zeroes = test_data.loc[~days_open, 'Id'].as_matrix().astype(int, copy=False)
+zeroes = testd.loc[~days_open, 'Id'].as_matrix().astype(int, copy=False)
 
 # Save that precious RAM,
-# do not delete test_data
-del train_data
+# do not delete testd
+del traind
+
+print 'xtrain.shape: ' + str(xtrain.shape)
 
 with open('dsetv3.pickle', 'wb') as f:
     pickle.dump({

@@ -14,7 +14,7 @@ sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
 from src import util
 
 # Some constants
-batch_size = 100000
+batch_size = 10000
 
 # Load train & test data
 data_dir = '../../data'
@@ -98,9 +98,18 @@ for store_id in store_ids:
     traind.loc[mask, 'Sales_Min'] = val
     testd.loc[mask2, 'Sales_Min'] = val
 
-std = traind['Sales'].std()
-mean = traind['Sales'].mean()
-traind.loc[:, 'Sales'] = (traind['Sales'] - mean) / std
+for store_id in store_ids:
+    mask = traind['Store'] == store_id
+
+    mean = traind.loc[mask, 'Sales'].mean()
+    std = traind.loc[mask, 'Sales'].std()
+
+    stores[store_id] = {
+        'mean': mean,
+        'std': std
+    }
+
+    traind.loc[mask, 'Sales'] = (traind.loc[mask, 'Sales'] - mean) / std
 
 znorm(traind, testd, 'Sales_Avg')
 znorm(traind, testd, 'Sales_Max')
@@ -186,32 +195,34 @@ testd.loc[testd['NoCompetition'], 'CompetitionDistance'] = 0.
 
 # IsDoingPromo2
 
+idtrain = traind['Store'].as_matrix().astype(int, copy=False)
 xtrain = traind.drop(['Store', 'DayOfWeek', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
 ytrain = traind['Sales'].as_matrix().astype(float, copy=False)
 
 prev_len = len(xtrain)
 num_rem = batch_size - prev_len % batch_size
+idtrain = np.insert(idtrain, prev_len, idtrain[:num_rem], 0)
 xtrain = np.insert(xtrain, prev_len, xtrain[:num_rem], 0)
 ytrain = np.insert(ytrain, prev_len, ytrain[:num_rem], 0)
 
-submid = testd.loc[testd['Open'] == 1, 'Id'].as_matrix().astype(int, copy=False)
-xtest = testd.loc[testd['Open'] == 1].drop(['Id', 'Store', 'DayOfWeek', 'Date', 'Open'], axis=1).as_matrix().astype(float, copy=False)
-closed = testd.loc[testd['Open'] == 0, 'Id'].as_matrix().astype(int, copy=False)
+submid = testd.loc[days_open, 'Id'].as_matrix().astype(int, copy=False)
+idtest = testd.loc[days_open, 'Store'].as_matrix().astype(int, copy=False)
+xtest = testd.loc[days_open].drop(['Id', 'Store', 'DayOfWeek', 'Date', 'Open'], axis=1).as_matrix().astype(float, copy=False)
+closed = testd.loc[~days_open, 'Id'].as_matrix().astype(int, copy=False)
 
 prev_len = len(xtest)
-
-# Number of test samples << batch_size
 num_rem = batch_size - prev_len % batch_size
-for i in range(0, num_rem, prev_len):
-    xtest = np.insert(xtest, prev_len, xtest[: min(prev_len, batch_size - len(xtest)) ], 0)
+idtest = np.insert(idtest, prev_len, idtest[:num_rem], 0)
+xtest = np.insert(xtest, prev_len, xtest[:num_rem], 0)
 
 with open('dset.pickle', 'wb') as f:
     pickle.dump({
+        'idtrain': idtrain,
         'xtrain': xtrain,
         'ytrain': ytrain,
         'submid': submid,
+        'idtest': idtest,
         'xtest': xtest,
         'closed': closed,
-        'mean': mean,
-        'std': std
+        'stores': stores
         }, f, protocol=pickle.HIGHEST_PROTOCOL)

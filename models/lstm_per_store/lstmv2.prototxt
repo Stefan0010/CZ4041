@@ -8,7 +8,7 @@ layer {
         shape: {
             dim: 500
             dim: 1
-            dim: 13
+            dim: 15
         }
     }
 }
@@ -48,7 +48,7 @@ layer {
     top: "lstm1"
 
     recurrent_param {
-        num_output: 64
+        num_output: 50
         weight_filler {
             type: "gaussian"
             std: 0.2
@@ -60,13 +60,23 @@ layer {
 }
 
 layer {
+    name: "do1"
+    type: "Dropout"
+    bottom: "lstm1"
+    top: "do1"
+    dropout_param {
+        dropout_ratio: 0.1
+    }
+}
+
+layer {
     name: "ip1"
     type: "InnerProduct"
-    bottom: "lstm1"
+    bottom: "do1"
     top: "ip1"
 
     inner_product_param {
-        num_output: 64
+        num_output: 50
         weight_filler {
             type: "xavier"
         }
@@ -77,9 +87,19 @@ layer {
 }
 
 layer {
+    name: "do2"
+    type: "Dropout"
+    bottom: "ip1"
+    top: "do2"
+    dropout_param {
+        dropout_ratio: 0.1
+    }
+}
+
+layer {
     name: "output"
     type: "InnerProduct"
-    bottom: "ip1"
+    bottom: "do2"
     top: "output"
 
     inner_product_param {

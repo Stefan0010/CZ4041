@@ -5,8 +5,11 @@ test_interval: 100000000
 
 type: "RMSProp"
 rms_decay: 0.99
+
 base_lr: 0.001
-lr_policy: "fixed"
+lr_policy: "inv"
+gamma: 0.000001
+power: 1
 
 display: 50
 average_loss: 50

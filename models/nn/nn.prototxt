@@ -6,7 +6,7 @@ layer {
     top: "data"
     input_param {
         shape: {
-            dim: 100000
+            dim: 10000
             dim: 34
         }
     }
@@ -21,7 +21,7 @@ layer {
     }
     input_param {
         shape: {
-            dim: 100000
+            dim: 10000
             dim: 1
         }
     }
@@ -32,24 +32,6 @@ layer {
     type: "InnerProduct"
     top: "ip1"
     bottom: "data"
-
-    inner_product_param {
-        num_output: 512
-        weight_filler {
-            type: "xavier"
-            variance_norm: AVERAGE
-        }
-        bias_filler {
-            type: "constant"
-        }
-    }
-}
-
-layer {
-    name: "ip2"
-    type: "InnerProduct"
-    top: "ip2"
-    bottom: "ip1"
 
     inner_product_param {
         num_output: 256
@@ -64,10 +46,48 @@ layer {
 }
 
 layer {
+    name: "do1"
+    type: "Dropout"
+    top: "do1"
+    bottom: "ip1"
+    dropout_param {
+        dropout_ratio: 0.1
+    }
+}
+
+layer {
+    name: "ip2"
+    type: "InnerProduct"
+    top: "ip2"
+    bottom: "do1"
+
+    inner_product_param {
+        num_output: 256
+        weight_filler {
+            type: "xavier"
+            variance_norm: AVERAGE
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "do2"
+    type: "Dropout"
+    top: "do2"
+    bottom: "ip2"
+    dropout_param {
+        dropout_ratio: 0.1
+    }
+}
+
+layer {
     name: "output"
     type: "InnerProduct"
     top: "output"
-    bottom: "ip2"
+    bottom: "do2"
 
     inner_product_param {
         num_output: 1
