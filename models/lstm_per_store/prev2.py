@@ -19,6 +19,7 @@ batch_size = {
     'val': 50,
     'test': 50
 }
+val_size = 50
 
 # Load train & test data
 data_dir = '../../data'
@@ -155,11 +156,11 @@ for store_id in store_ids:
     y = dfv['Sales'].as_matrix().astype(float, copy=False)
     del dfv
 
-    xtrain = x[:-batch_size['val']]
-    ytrain = y[:-batch_size['val']]
+    xtrain = x[:-val_size]
+    ytrain = y[:-val_size]
 
-    xval = x[-batch_size['val']:]
-    yval = y[-batch_size['val']:]
+    xval = x[-val_size:]
+    yval = y[-val_size:]
     cont_val = np.ones(len(xval))
     cont_val[0] = 0
     assert len(xval) == len(yval)
