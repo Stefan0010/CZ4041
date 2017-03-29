@@ -39,7 +39,11 @@ def train(store_id, num_epoch=300, val_every=6):
     solver = caffe.get_solver('solverv2.prototxt')
     net = solver.net
     test_net = solver.test_nets[0]
-    losses = []
+
+    train_iter = 0
+    train_losses = []
+    val_x = []
+    val_losses = []
 
     xtrain = stores[store_id]['xtrain']
     ytrain = stores[store_id]['ytrain']
@@ -58,7 +62,8 @@ def train(store_id, num_epoch=300, val_every=6):
             net.blobs['target'].data[:, 0] = ytrain[t:t+batch_size]
             solver.step(1)
 
-            losses.append(net.blobs['loss'].data.item(0))
+            train_losses.append(net.blobs['loss'].data.item(0))
+            train_iter += 1
 
         if epoch % val_every == 0:
             preds = np.zeros(num_ts)
@@ -70,6 +75,9 @@ def train(store_id, num_epoch=300, val_every=6):
 
             preds_de = mean + preds * std
             rmspe = np.sqrt( np.sum(((preds_de[ytrain_mask]-ytrain_de[ytrain_mask])/ytrain_de[ytrain_mask])**2)/ytrain_mask.sum() )
+
+            val_x.append(train_iter - 1)
+            val_losses.append(loss)
 
             print 'Val 100%% loss: %.9f, rmspe: %.9f' % (loss, rmspe)
             if loss < min_loss:
@@ -85,7 +93,8 @@ def train(store_id, num_epoch=300, val_every=6):
     plt.plot(np.arange(num_ts), ytrain_de, '-b')
     plt.plot(np.arange(num_ts), preds_de, '-r')
     plt.subplots()
-    plt.plot(np.arange(len(losses)), losses)
+    plt.plot(np.arange(len(train_losses)), train_losses, '-b')
+    plt.plot(val_x, val_losses, '-r')
     plt.show()
 
     return caffe.Net('lstmv2.prototxt', net_fname, caffe.TEST)
@@ -114,7 +123,7 @@ with open('submission.csv', 'w') as f:
     for store_id in zeroes:
         f.write('%d,%.15f\n' % (store_id, 0.))
 
-for store_id in stores:
+for store_id in [1]:
     net_fname = os.path.join('temp', '_%d.caffemodel' % store_id)
-    net = train(store_id, 500)
+    net = train(store_id, 1500, 10)
     predict(store_id, net)

@@ -14,7 +14,11 @@ sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
 from src import util
 
 # Some constants
-batch_size = 500
+batch_size = {
+    'train': 500,
+    'val': 50,
+    'test': 50
+}
 
 # Load train & test data
 data_dir = '../../data'
@@ -147,14 +151,23 @@ del testd['CompetitionDistance']
 for store_id in store_ids:
     # Drops store id
     dfv = traind.loc[traind['Store'] == store_id]
-    xtrain = dfv.drop(['Store', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
-    ytrain = dfv['Sales'].as_matrix().astype(float, copy=False)
+    x = dfv.drop(['Store', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
+    y = dfv['Sales'].as_matrix().astype(float, copy=False)
     del dfv
+
+    xtrain = x[:-batch_size['val']]
+    ytrain = y[:-batch_size['val']]
+
+    xval = x[-batch_size['val']:]
+    yval = y[-batch_size['val']:]
+    cont_val = np.ones(len(xval))
+    cont_val[0] = 0
+    assert len(xval) == len(yval)
 
     # Tweaks for batched learning
     assert len(xtrain) == len(ytrain)
     prev_len = len(xtrain)
-    num_rem = batch_size - prev_len % batch_size
+    num_rem = batch_size['train'] - prev_len % batch_size['train']
     xtrain = np.insert(xtrain, prev_len, xtrain[:num_rem], 0)
     ytrain = np.insert(ytrain, prev_len, ytrain[:num_rem], 0)
     cont_train = np.ones(len(xtrain))
@@ -165,6 +178,10 @@ for store_id in store_ids:
     stores[store_id]['ytrain'] = ytrain
     stores[store_id]['cont_train'] = cont_train
 
+    stores[store_id]['xval'] = xval
+    stores[store_id]['yval'] = yval
+    stores[store_id]['cont_val'] = cont_val
+
     # Process its respective test data
     dfv = testd.loc[days_open & (testd['Store'] == store_id)]
     xtest = dfv.drop(['Id', 'Store', 'Date', 'Open'], axis=1).as_matrix().astype(float, copy=False)
@@ -172,24 +189,19 @@ for store_id in store_ids:
     del dfv
 
     # Tweak for batched learning
+    assert len(xtest) == len(submid)
     prev_len = len(xtest)
-    num_rem = batch_size - prev_len % batch_size
-
-    cont_test = np.ones(batch_size)
+    num_rem = batch_size['test'] - prev_len % batch_size['test']
+    xtest = np.insert(xtest, prev_len, xtest[:num_rem], 0)
+    cont_test = np.ones(len(xval))
     cont_test[0] = 0
-    for i in range(0, num_rem, prev_len):
-        xtest = np.insert(xtest, len(xtest), xtest[:min(prev_len, num_rem - i)], 0)
-        cont_test[prev_len + i] = 0
+    cont_test[prev_len] = 0
 
     stores[store_id]['xtest'] = xtest
     stores[store_id]['submid'] = submid
     stores[store_id]['cont_test'] = cont_test
 
 zeroes = testd.loc[~days_open, 'Id'].as_matrix().astype(int, copy=False)
-
-# Save that precious RAM,
-# do not delete testd
-del traind
 
 print 'xtrain.shape: ' + str(xtrain.shape)
 
