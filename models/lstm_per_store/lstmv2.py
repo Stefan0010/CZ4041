@@ -52,15 +52,15 @@ def train(store_id, num_epoch=300, val_every=6):
     ytrain_mask = ytrain_de >= 1.0
     cont_train = stores[store_id]['cont_train']
     train_iter = 0
-    train_losses = []
+    # train_losses = []
 
     xval = stores[store_id]['xval']
     yval = stores[store_id]['yval']
     cont_val = stores[store_id]['cont_val']
     yval_de = mean + yval * std
     yval_mask = yval_de >= 1.0
-    val_x = []
-    val_losses = []
+    # val_x = []
+    # val_losses = []
 
     num_ts = len(xtrain)
 
@@ -72,7 +72,7 @@ def train(store_id, num_epoch=300, val_every=6):
             net.blobs['target'].data[:, 0] = ytrain[t:t+batch_size['train']]
             solver.step(1)
 
-            train_losses.append(net.blobs['loss'].data.item(0))
+            # train_losses.append(net.blobs['loss'].data.item(0))
             train_iter += 1
 
         if epoch % val_every == 0:
@@ -86,8 +86,8 @@ def train(store_id, num_epoch=300, val_every=6):
             preds_de = mean + preds * std
             rmspe = np.sqrt( np.sum(((preds_de[yval_mask]-yval_de[yval_mask])/yval_de[yval_mask])**2)/yval_mask.sum() )
 
-            val_x.append(train_iter - 1)
-            val_losses.append(loss)
+            # val_x.append(train_iter - 1)
+            # val_losses.append(loss)
 
             print 'Val 50 samples, loss: %.9f, rmspe: %.9f' % (loss, rmspe)
             if loss < min_loss:
@@ -99,10 +99,10 @@ def train(store_id, num_epoch=300, val_every=6):
     print '| Time taken: %.9f' % (time.time() - start_time)
     print '+=============================================================================+'
 
-    plt.subplots()
-    plt.plot(np.arange(len(train_losses)), train_losses, '-b')
-    plt.plot(val_x, val_losses, '-r')
-    plt.show()
+    # plt.subplots()
+    # plt.plot(np.arange(len(train_losses)), train_losses, '-b')
+    # plt.plot(val_x, val_losses, '-r')
+    # plt.show()
 
     return caffe.Net('lstmv2.prototxt', net_fname, caffe.TEST)
 
@@ -130,7 +130,7 @@ with open('submission.csv', 'w') as f:
     for store_id in zeroes:
         f.write('%d,%.15f\n' % (store_id, 0.))
 
-for store_id in [1]:
+for store_id in stores:
     net_fname = os.path.join('temp', '_%d.caffemodel' % store_id)
-    net = train(store_id, 1000, 10)
+    net = train(store_id, 200, 5)
     predict(store_id, net)

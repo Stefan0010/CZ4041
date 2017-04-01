@@ -6,9 +6,9 @@ layer {
     top: "data"
     input_param {
         shape: {
-            dim: 10000
+            dim: 5000
             dim: 1
-            dim: 18
+            dim: 36
         }
     }
 }
@@ -19,7 +19,7 @@ layer {
     top: "cont"
     input_param {
         shape: {
-            dim: 10000
+            dim: 5000
             dim: 1
         }
     }
@@ -34,7 +34,7 @@ layer {
     }
     input_param {
         shape: {
-            dim: 10000
+            dim: 5000
             dim: 1
         }
     }
@@ -47,8 +47,11 @@ layer {
     bottom: "cont"
     top: "lstm1"
 
+    param { lr_mult: 1 }
+    param { lr_mult: 2 }
+
     recurrent_param {
-        num_output: 100
+        num_output: 64
         weight_filler {
             type: "xavier"
         }
@@ -64,8 +67,11 @@ layer {
     bottom: "lstm1"
     top: "ip2"
 
+    param { lr_mult: 1 }
+    param { lr_mult: 2 }
+
     inner_product_param {
-        num_output: 100
+        num_output: 64
         weight_filler {
             type: "xavier"
         }
@@ -80,6 +86,9 @@ layer {
     type: "InnerProduct"
     bottom: "ip2"
     top: "output"
+
+    param { lr_mult: 1 }
+    param { lr_mult: 2 }
 
     inner_product_param {
         num_output: 1

@@ -15,6 +15,7 @@ from src import util
 
 # Some constants
 batch_size = 10000
+val_size = 50000
 
 # Load train & test data
 data_dir = '../../data'
@@ -38,7 +39,6 @@ days_open = testd['Open'] == 1
 
 # Store
 store_ids = traind['Store'].unique().astype(int, copy=False)
-stores = {}
 
 # DayOfWeek
 traind.insert(len(traind.columns), 'Monday', traind['DayOfWeek'] == 1)
@@ -59,18 +59,11 @@ testd.insert(len(testd.columns), 'Sunday', testd['DayOfWeek'] == 7)
 
 # Date
 date_min = datetime(2013,  1,  1)
-date_max = datetime(2015,  9, 18)
+date_max = datetime(2015,  7, 31)
 date_normer = float((date_max - date_min).days)
 
 traind.insert(len(traind.columns), 'Date_Norm', (traind['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
-traind.insert(len(traind.columns), 'Day_Norm', (traind['Date'].dt.day - 1.) / 31.)
-traind.insert(len(traind.columns), 'Month_Norm', (traind['Date'].dt.month - 1.) / 12.)
-traind.insert(len(traind.columns), 'Year_Norm', (traind['Date'].dt.year - 2013.) / 2.)
-
 testd.insert(len(testd.columns), 'Date_Norm', (testd['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
-testd.insert(len(testd.columns), 'Day_Norm', (testd['Date'].dt.day - 1.) / 31.)
-testd.insert(len(testd.columns), 'Month_Norm', (testd['Date'].dt.month - 1.) / 12.)
-testd.insert(len(testd.columns), 'Year_Norm', (testd['Date'].dt.year - 2013.) / 2.)
 
 # Sales
 traind.insert(len(traind.columns), 'Sales_Avg', 0.)
@@ -98,18 +91,9 @@ for store_id in store_ids:
     traind.loc[mask, 'Sales_Min'] = val
     testd.loc[mask2, 'Sales_Min'] = val
 
-for store_id in store_ids:
-    mask = traind['Store'] == store_id
-
-    mean = traind.loc[mask, 'Sales'].mean()
-    std = traind.loc[mask, 'Sales'].std()
-
-    stores[store_id] = {
-        'mean': mean,
-        'std': std
-    }
-
-    traind.loc[mask, 'Sales'] = (traind.loc[mask, 'Sales'] - mean) / std
+mean = traind['Sales'].mean()
+std = traind['Sales'].std()
+traind.loc[:, 'Sales'] = (traind.loc[:, 'Sales'] - mean) / std
 
 znorm(traind, testd, 'Sales_Avg')
 znorm(traind, testd, 'Sales_Max')
@@ -156,13 +140,9 @@ del traind['StateHoliday']
 del testd['StateHoliday']
 
 # SchoolHoliday
-
 # StateHoliday_0
-
 # StateHoliday_a
-
 # StateHoliday_b
-
 # StateHoliday_c
 
 # Weekends
@@ -190,14 +170,29 @@ max_compdist = traind['CompetitionDistance'].max()
 traind.loc[:, 'CompetitionDistance'] = traind['CompetitionDistance'] / max_compdist
 testd.loc[:, 'CompetitionDistance'] = testd['CompetitionDistance'] / max_compdist
 
-traind.loc[traind['NoCompetition'], 'CompetitionDistance'] = 0.
-testd.loc[testd['NoCompetition'], 'CompetitionDistance'] = 0.
+traind.loc[traind['NoCompetition'], 'CompetitionDistance'] = 1.0
+testd.loc[testd['NoCompetition'], 'CompetitionDistance'] = 1.0
 
 # IsDoingPromo2
 
-idtrain = traind['Store'].as_matrix().astype(int, copy=False)
-xtrain = traind.drop(['Store', 'DayOfWeek', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
-ytrain = traind['Sales'].as_matrix().astype(float, copy=False)
+# Store ids changed from 1-1115 to 0-1114 for embedding layer
+idvec = traind['Store'].as_matrix().astype(int, copy=False) - 1
+x = traind.drop(['Store', 'DayOfWeek', 'Date', 'Sales', 'Open'], axis=1).as_matrix().astype(float, copy=False)
+y = traind['Sales'].as_matrix().astype(float, copy=False)
+
+shuffledidx = np.arange(len(idvec))
+np.random.shuffle(shuffledidx)
+idvec = idvec[shuffledidx]
+x = x[shuffledidx]
+y = y[shuffledidx]
+
+idtrain = idvec[:-val_size]
+xtrain = x[:-val_size]
+ytrain = y[:-val_size]
+
+idval = idvec[-val_size:]
+xval = x[-val_size:]
+yval = y[-val_size:]
 
 prev_len = len(xtrain)
 num_rem = batch_size - prev_len % batch_size
@@ -205,8 +200,9 @@ idtrain = np.insert(idtrain, prev_len, idtrain[:num_rem], 0)
 xtrain = np.insert(xtrain, prev_len, xtrain[:num_rem], 0)
 ytrain = np.insert(ytrain, prev_len, ytrain[:num_rem], 0)
 
+# Store ids in test dataset changed from 1-1115 to 0-1114
+idtest = testd.loc[days_open, 'Store'].as_matrix().astype(int, copy=False) - 1
 submid = testd.loc[days_open, 'Id'].as_matrix().astype(int, copy=False)
-idtest = testd.loc[days_open, 'Store'].as_matrix().astype(int, copy=False)
 xtest = testd.loc[days_open].drop(['Id', 'Store', 'DayOfWeek', 'Date', 'Open'], axis=1).as_matrix().astype(float, copy=False)
 closed = testd.loc[~days_open, 'Id'].as_matrix().astype(int, copy=False)
 
@@ -217,12 +213,16 @@ xtest = np.insert(xtest, prev_len, xtest[:num_rem], 0)
 
 with open('dset.pickle', 'wb') as f:
     pickle.dump({
+        'mean': mean,
+        'std': std,
         'idtrain': idtrain,
         'xtrain': xtrain,
         'ytrain': ytrain,
+        'idval': idval,
+        'xval': xval,
+        'yval': yval,
         'submid': submid,
         'idtest': idtest,
         'xtest': xtest,
         'closed': closed,
-        'stores': stores
         }, f, protocol=pickle.HIGHEST_PROTOCOL)
