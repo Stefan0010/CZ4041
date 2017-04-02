@@ -15,7 +15,7 @@ import time
 sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
 from src import util
 
-batch_size = 10000
+batch_size = 5000
 
 with open('stores.pickle', 'rb') as f:
     stores = pickle.load(f)
@@ -25,6 +25,13 @@ with open('traind.pickle', 'rb') as f:
     idtrain = dset['idtrain']
     xtrain = dset['xtrain']
     ytrain = dset['ytrain']
+
+    mean = dset['mean']
+    std = dset['std']
+
+    ytrain_de = mean + ytrain * std
+    ytrain_mask = ytrain_de >= 1.
+
     cont_train = dset['cont_train']
     del dset
 
@@ -33,27 +40,50 @@ with open('vald.pickle', 'rb') as f:
     idval = dset['idval']
     xval = dset['xval']
     yval = dset['yval']
+
+    yval_de = mean + yval * std
+    yval_mask = yval_de >= 1.
+
     cont_val = dset['cont_val']
     del dset
 
-def train(num_epoch=10, solver_proto='solver2.prototxt'):
-    solver = caffe.get_solver(solver_proto)
+with open('testd.pickle', 'rb') as f:
+    dset = pickle.load(f)
+    idtest = dset['idtest']
+    xtest = dset['xtest']
+    submid = dset['submid']
+    cont_test = dset['cont_test']
+    zeros = dset['zeros']
+    del dset
+
+def train(num_epoch=10, val_every=1):
+    solver = caffe.get_solver('solver2.prototxt')
 
     net = solver.net
     test_net = solver.test_nets[0]
 
     ts = len(xtrain)
     ts_val = len(xval)
-    losses = []
-    for epoch in range(num_epoch):
-        print 'EPOCH %d' % (epoch + 1)
+
+    train_iter = 0
+    train_losses = []
+    min_loss = float('inf')
+    val_x = []
+    val_losses = []
+
+    for epoch in range(1,num_epoch+1):
+        print 'EPOCH %d' % epoch
         for t in range(0, ts, batch_size):
             net.blobs['data'].data[:, 0] = xtrain[t:t+batch_size]
             net.blobs['cont'].data[:, 0] = cont_train[t:t+batch_size]
             net.blobs['target'].data[:, 0] = ytrain[t:t+batch_size]
             solver.step(1)
 
-            losses.append(net.blobs['loss'].data.item(0))
+            train_losses.append(net.blobs['loss'].data.item(0))
+            train_iter += 1
+
+        if epoch % val_every != 0:
+            continue
 
         print '+------------+'
         print '| Validating |'
@@ -62,37 +92,26 @@ def train(num_epoch=10, solver_proto='solver2.prototxt'):
         for t in range(0, ts_val, batch_size):
             test_net.blobs['data'].data[:, 0] = xval[t:t+batch_size]
             test_net.blobs['cont'].data[:, 0] = cont_val[t:t+batch_size]
-
             preds[t:t+batch_size] = test_net.forward()['output'][:, 0]
+        loss = np.sum((preds - yval)**2)/ts_val
 
-        y_de = yval.copy()
-        for t in range(ts_val):
-            sid = idval[t]
-            mean = stores[sid]['mean']
-            std = stores[sid]['std']
-            preds[t] = mean + preds[t] * std
-            y_de[t] = mean + y_de[t] * std
-        mask = y_de >= 1.
+        val_x.append(train_iter - 1)
+        val_losses.append(loss)
+        if loss < min_loss:
+            min_loss = loss
+            net.save('lstm2.caffemodel')
 
-        RMSE = np.sqrt(  ((preds - y_de)**2).sum()/ts_val  )
-        RMSPE = np.sqrt(  (((preds[mask]- y_de[mask])/y_de[mask])**2).sum()/mask.sum()  )
-        print 'RMSE : %.9f' % RMSE
-        print 'RMSPE: %.9f' % RMSPE
+        preds_de = mean + preds * std
+        rmspe = np.sqrt( np.sum( ((preds_de[yval_mask]-yval_de[yval_mask])/yval_de[yval_mask])**2 )/yval_mask.sum() )
+
+        print 'loss: %.9f, rmspe: %.9f' % (loss, rmspe)
 
     plt.subplots()
-    plt.subplots_adjust(left=0.025, bottom=0.025, right=.99, top=.99, wspace=0., hspace=0.)
-    plt.xlim(0, 750)
-    plt.plot(np.arange(750), y_de[-750:])
-    plt.plot(np.arange(750), preds[-750:])
-
-    plt.subplots()
-    plt.subplots_adjust(left=0.025, bottom=0.025, right=.99, top=.99, wspace=0., hspace=0.)
-    plt.xlim(0, len(losses))
-    plt.ylim(0, max(losses))
-    plt.plot(np.arange(len(losses)), losses)
+    plt.plot(np.arange(len(train_losses)), train_losses, '-b')
+    plt.plot(val_x, val_losses, '-r')
     plt.show()
 
-    return solver
+    return caffe.Net('lstm2.prototxt', 'lstm2.caffemodel', caffe.TEST)
 
-solver = train(5)
+net = train(10)
 print 'Training done!'

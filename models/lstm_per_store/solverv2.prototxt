@@ -4,9 +4,9 @@ test_iter: 1
 test_interval: 100000000
 
 type: "RMSProp"
-rms_decay: 0.99
+rms_decay: 0.9
 
-base_lr: 0.001
+base_lr: 0.0005
 lr_policy: "inv"
 gamma: 0.000001
 power: 1

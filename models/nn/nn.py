@@ -7,8 +7,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from datetime import datetime
+import time
 import pickle
+from datetime import datetime
 
 sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
 from src import util
@@ -21,77 +22,98 @@ data_dir = '../../data'
 
 with open('dset.pickle', 'rb') as f:
     dset = pickle.load(f)
+    mean = dset['mean']
+    std = dset['std']
+
     idtrain = dset['idtrain']
     xtrain = dset['xtrain']
     ytrain = dset['ytrain']
+    ytrain_de = mean + ytrain * std
+    ytrain_mask = ytrain_de >= 1.
+    assert len(idtrain) == len(xtrain) == len(ytrain)
+
+    idval = dset['idval']
+    xval = dset['xval']
+    yval = dset['yval']
+    yval_de = mean + yval * std
+    yval_mask = yval_de >= 1.
+    assert len(idval) == len(xval) == len(yval)
+
     submid = dset['submid']
     idtest = dset['idtest']
     xtest = dset['xtest']
-    closed = dset['closed']
-    stores = dset['stores']
-
-    assert len(idtrain) == len(xtrain) == len(ytrain)
-
-    y_de = np.zeros(len(ytrain))
-    for i in range(len(idtrain)):
-        sid = idtrain[i]
-        y_de[i] = stores[sid]['mean'] + stores[sid]['std'] * ytrain[i]
-
     assert len(idtest) == len(xtest)
+
+    closed = dset['closed']
 
     del dset
 
-def train(num_epochs=10):
+def train(num_epochs=10, val_every=1):
     solver = caffe.get_solver('nn_solv.prototxt')
 
     net = solver.net
     test_net = solver.test_nets[0]
 
-    losses = []
+    train_iter = 0
+    train_losses = []
+
+    val_x = []
+    val_losses = []
     min_loss = float('inf')
 
     num_ts = len(xtrain)
-    for epoch in range(num_epochs):
+    start_time = time.time()
+    for epoch in range(1, num_epochs+1):
+        print 'EPOCH %d' % epoch
         for t in range(0, num_ts, batch_size):
-            net.blobs['data'].data[:] = xtrain[t:t+batch_size]
-            net.blobs['target'].data[:, 0] = ytrain[t:t+batch_size]
+            net.blobs['store_id'].data[:, 0]    = idtrain[t:t+batch_size]
+            net.blobs['data'].data[:]           = xtrain[t:t+batch_size]
+            net.blobs['target'].data[:, 0]      = ytrain[t:t+batch_size]
             solver.step(1)
 
-            loss = net.blobs['loss'].data.item(0)
-            losses.append(loss)
+            train_losses.append(net.blobs['loss'].data.item(0))
+            train_iter += 1
+
+        if epoch % val_every == 0:
+            val_x.append(train_iter - 1)
+
+            preds = np.zeros(len(xval))
+            for t in range(0, len(xval), batch_size):
+                test_net.blobs['store_id'].data[:, 0]   = idval[t:t+batch_size]
+                test_net.blobs['data'].data[:]          = xval[t:t+batch_size]
+                preds[t:t+batch_size] = test_net.forward()['output'][:, 0]
+            preds_de = mean + preds * std
+
+            loss = np.sum((yval - preds)**2)/len(xval)
+            val_losses.append(loss)
+
+            rmspe = np.sqrt( np.sum( ((yval_de[yval_mask]-preds_de[yval_mask])/yval_de[yval_mask])**2 )/yval_mask.sum() )
+            print 'Val 50k samples loss: %.9f, rmspe: %.9f' % (loss, rmspe)
+
             if loss < min_loss:
                 min_loss = loss
                 net.save('nn.caffemodel')
 
+    net = caffe.Net('nn.prototxt', 'nn.caffemodel', caffe.TEST)
+
+    # preds = np.zeros(len(xval))
+    # for t in range(0, len(xval), batch_size):
+    #     test_net.blobs['data'].data[:] = xval[t:t+batch_size]
+    #     preds[t:t+batch_size] = test_net.forward()['output'][:, 0]
+    # preds_de = mean + preds * std
+
+    # plt.subplots()
+    # plt.plot(np.arange(500), yval_de[:500], '-b')
+    # plt.plot(np.arange(500), preds_de[:500], '-r')
+
     plt.subplots()
-    plt.plot(np.arange(len(losses)), losses)
-    plt.ylim(0, max(losses))
-    plt.xlim(0, len(losses))
-    plt.subplots_adjust(left=0.025, right=0.99, top=0.99, bottom=0.025, wspace=0., hspace=0.)
-
-    preds = np.zeros(num_ts)
-    for t in range(0, num_ts, batch_size):
-        test_net.blobs['data'].data[:] = xtrain[t:t+batch_size]
-        preds[t:t+batch_size] = test_net.forward()['output'][:, 0]
-
-    for i in range(num_ts):
-        sid = idtrain[i]
-        preds[i] = stores[sid]['mean'] + stores[sid]['std'] * preds[i]
-
-    rmse = np.sqrt( np.sum((preds-y_de)**2)/num_ts )
-
-    mask = y_de >= 1.
-
-    rmspe = np.sqrt( np.sum(  ((preds[mask]-y_de[mask])/y_de[mask])**2  )/mask.sum() )
-
-    print 'RMSE : %.15f' % rmse
-    print 'RMSPE: %.15f' % rmspe
-
+    plt.plot(np.arange(len(train_losses)), train_losses, '-b')
+    plt.plot(val_x, val_losses, '-r')
     plt.show()
 
-    return caffe.Net('nn.prototxt', 'nn.caffemodel', caffe.TEST)
+    return net
 
-net = train(100)
+net = train(10, 1)
 
 def test(net):
     with open('submission.csv', 'w') as f:
@@ -100,18 +122,14 @@ def test(net):
 
     num_ts = len(xtest)
     preds = np.zeros(num_ts)
-
     for t in range(0, num_ts, batch_size):
-        net.blobs['data'].data[:] = xtest[t:t+batch_size]
+        net.blobs['store_id'].data[:, 0]    = idtest[t:t+batch_size]
+        net.blobs['data'].data[:]           = xtest[t:t+batch_size]
         preds[t:t+batch_size] = net.forward()['output'][:, 0]
-
-    for i in range(num_ts):
-        sid = idtest[i]
-        preds[i] = stores[sid]['mean'] + stores[sid]['std'] * preds[i]
+    preds = mean + preds * std
 
     with open('submission.csv', 'a') as f:
         for i in range(len(submid)):
             f.write('%d,%.15f\n' % (submid[i], preds[i]))
 
-# net = caffe.Net('nn.prototxt', 'nn.caffemodel', caffe.TEST)
-test(net)
+# test(net)

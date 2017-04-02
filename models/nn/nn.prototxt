@@ -1,14 +1,67 @@
 name: "nn_simple"
 
 layer {
+    name: "store_id"
+    type: "Input"
+    top: "store_id"
+    input_param: {
+        shape: {
+            dim: 10000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed1"
+    type: "Embed"
+    top: "embed1"
+    bottom: "store_id"
+    embed_param {
+        input_dim: 1115
+        num_output: 11
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
     name: "data"
     type: "Input"
     top: "data"
     input_param {
         shape: {
             dim: 10000
-            dim: 34
+            dim: 31
         }
+    }
+}
+
+layer {
+    name: "reshape1"
+    type: "Reshape"
+    top: "reshape1"
+    bottom: "embed1"
+    reshape_param {
+        shape {
+            dim: 10000
+            dim: 11
+        }
+    }
+}
+
+layer {
+    name: "concat1"
+    type: "Concat"
+    top: "concat1"
+    bottom: "reshape1"
+    bottom: "data"
+    concat_param {
+        axis: 1
     }
 }
 
@@ -31,13 +84,12 @@ layer {
     name: "ip1"
     type: "InnerProduct"
     top: "ip1"
-    bottom: "data"
+    bottom: "concat1"
 
     inner_product_param {
-        num_output: 256
+        num_output: 128
         weight_filler {
             type: "xavier"
-            variance_norm: AVERAGE
         }
         bias_filler {
             type: "constant"
@@ -62,10 +114,9 @@ layer {
     bottom: "do1"
 
     inner_product_param {
-        num_output: 256
+        num_output: 128
         weight_filler {
             type: "xavier"
-            variance_norm: AVERAGE
         }
         bias_filler {
             type: "constant"
@@ -93,7 +144,6 @@ layer {
         num_output: 1
         weight_filler {
             type: "xavier"
-            variance_norm: AVERAGE
         }
         bias_filler {
             type: "constant"

@@ -19,7 +19,7 @@ batch_size = {
     'val': 50,
     'test': 50
 }
-val_size = 50
+val_size = 100
 
 # Load train & test data
 data_dir = '../../data'
