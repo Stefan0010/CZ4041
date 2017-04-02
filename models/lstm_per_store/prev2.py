@@ -93,11 +93,24 @@ del testd['StateHoliday']
 
 # StateHoliday_0
 
+
+del traind['StateHoliday_0']
+del testd['StateHoliday_0']
+
 # StateHoliday_a
+
+del traind['StateHoliday_a']
+del testd['StateHoliday_a']
 
 # StateHoliday_b
 
+del traind['StateHoliday_b']
+del testd['StateHoliday_b']
+
 # StateHoliday_c
+
+del traind['StateHoliday_c']
+del testd['StateHoliday_c']
 
 # Weekends
 del traind['Weekends']

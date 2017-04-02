@@ -4,9 +4,9 @@ layer {
     name: "store_id"
     type: "Input"
     top: "store_id"
-    input_param: {
-        shape: {
-            dim: 10000
+    input_param {
+        shape {
+            dim: 5000
             dim: 1
         }
     }
@@ -30,13 +30,216 @@ layer {
 }
 
 layer {
+    name: "day"
+    type: "Input"
+    top: "day"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed2"
+    type: "Embed"
+    top: "embed2"
+    bottom: "day"
+    embed_param {
+        input_dim: 31
+        num_output: 7
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "month"
+    type: "Input"
+    top: "month"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed3"
+    type: "Embed"
+    top: "embed3"
+    bottom: "month"
+    embed_param {
+        input_dim: 12
+        num_output: 4
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "year"
+    type: "Input"
+    top: "year"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed4"
+    type: "Embed"
+    top: "embed4"
+    bottom: "year"
+    embed_param {
+        input_dim: 3
+        num_output: 2
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "dow"
+    type: "Input"
+    top: "dow"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed5"
+    type: "Embed"
+    top: "embed5"
+    bottom: "dow"
+    embed_param {
+        input_dim: 7
+        num_output: 3
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "sth"
+    type: "Input"
+    top: "sth"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed6"
+    type: "Embed"
+    top: "embed6"
+    bottom: "sth"
+    embed_param {
+        input_dim: 4
+        num_output: 2
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "stype"
+    type: "Input"
+    top: "stype"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed7"
+    type: "Embed"
+    top: "embed7"
+    bottom: "stype"
+    embed_param {
+        input_dim: 4
+        num_output: 2
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "atype"
+    type: "Input"
+    top: "atype"
+    input_param {
+        shape {
+            dim: 5000
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed8"
+    type: "Embed"
+    top: "embed8"
+    bottom: "atype"
+    embed_param {
+        input_dim: 3
+        num_output: 2
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
     name: "data"
     type: "Input"
     top: "data"
     input_param {
-        shape: {
-            dim: 10000
-            dim: 31
+        shape {
+            dim: 5000
+            dim: 13
         }
     }
 }
@@ -48,8 +251,99 @@ layer {
     bottom: "embed1"
     reshape_param {
         shape {
-            dim: 10000
+            dim: 5000
             dim: 11
+        }
+    }
+}
+
+layer {
+    name: "reshape2"
+    type: "Reshape"
+    top: "reshape2"
+    bottom: "embed2"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 7
+        }
+    }
+}
+
+layer {
+    name: "reshape3"
+    type: "Reshape"
+    top: "reshape3"
+    bottom: "embed3"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 4
+        }
+    }
+}
+
+layer {
+    name: "reshape4"
+    type: "Reshape"
+    top: "reshape4"
+    bottom: "embed4"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 2
+        }
+    }
+}
+
+layer {
+    name: "reshape5"
+    type: "Reshape"
+    top: "reshape5"
+    bottom: "embed5"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 3
+        }
+    }
+}
+
+layer {
+    name: "reshape6"
+    type: "Reshape"
+    top: "reshape6"
+    bottom: "embed6"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 2
+        }
+    }
+}
+
+layer {
+    name: "reshape7"
+    type: "Reshape"
+    top: "reshape7"
+    bottom: "embed7"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 2
+        }
+    }
+}
+
+layer {
+    name: "reshape8"
+    type: "Reshape"
+    top: "reshape8"
+    bottom: "embed8"
+    reshape_param {
+        shape {
+            dim: 5000
+            dim: 2
         }
     }
 }
@@ -59,6 +353,13 @@ layer {
     type: "Concat"
     top: "concat1"
     bottom: "reshape1"
+    bottom: "reshape2"
+    bottom: "reshape3"
+    bottom: "reshape4"
+    bottom: "reshape5"
+    bottom: "reshape6"
+    bottom: "reshape7"
+    bottom: "reshape8"
     bottom: "data"
     concat_param {
         axis: 1
@@ -73,8 +374,8 @@ layer {
         phase: TRAIN
     }
     input_param {
-        shape: {
-            dim: 10000
+        shape {
+            dim: 5000
             dim: 1
         }
     }
@@ -114,7 +415,7 @@ layer {
     bottom: "do1"
 
     inner_product_param {
-        num_output: 128
+        num_output: 64
         weight_filler {
             type: "xavier"
         }

@@ -17,6 +17,36 @@ layer {
 }
 
 layer {
+    name: "dow"
+    type: "Input"
+    top: "dow"
+    include {
+        phase: TRAIN
+    }
+    input_param {
+        shape {
+            dim: 500
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "sth"
+    type: "Input"
+    top: "sth"
+    include {
+        phase: TRAIN
+    }
+    input_param {
+        shape {
+            dim: 500
+            dim: 1
+        }
+    }
+}
+
+layer {
     name: "data"
     type: "Input"
     top: "data"
@@ -28,6 +58,70 @@ layer {
             dim: 50
             dim: 1
             dim: 15
+        }
+    }
+}
+
+layer {
+    name: "dow"
+    type: "Input"
+    top: "dow"
+    include {
+        phase: TEST
+    }
+    input_param {
+        shape {
+            dim: 50
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "sth"
+    type: "Input"
+    top: "sth"
+    include {
+        phase: TEST
+    }
+    input_param {
+        shape {
+            dim: 50
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "embed1"
+    type: "Embed"
+    top: "embed1"
+    bottom: "dow"
+    embed_param {
+        input_dim: 7
+        num_output: 3
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "embed2"
+    type: "Embed"
+    top: "embed2"
+    bottom: "sth"
+    embed_param {
+        input_dim: 4
+        num_output: 2
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
         }
     }
 }
@@ -78,9 +172,20 @@ layer {
 }
 
 layer {
+    name: "concat1"
+    type: "Concat"
+    bottom: "embed1"
+    bottom: "embed2"
+    bottom: "data"
+    concat_param {
+        axis: 2
+    }
+}
+
+layer {
     name: "lstm1"
     type: "LSTM"
-    bottom: "data"
+    bottom: "concat1"
     bottom: "cont"
     top: "lstm1"
 
