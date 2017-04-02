@@ -6,8 +6,10 @@ import math
 import time
 import pickle
 import util
+from datetime import datetime
 
 from sklearn import linear_model
+from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error as mse
 
 def rmspe(y_pred, y_actual):
@@ -72,7 +74,7 @@ def evaluate():
 	return True
 
 def predictPre():
-	with open ('../data/dset.pickle', 'rb') as file:
+	with open ('../data/dset_ridge.pickle', 'rb') as file:
 		d = pickle.load(file)
 
 	model = linear_model.Ridge(alpha=1.0)
@@ -94,21 +96,114 @@ def predictPre():
 
 	return True
 
-def predictPerStore():
-	# initialize result array
-	result = np.zeros(shape=(41088,2))
+def preProcess(tr, ts):
+	# day of week feature
+	# greatly improve
+	tr.insert(len(tr.columns), 'Monday', tr['DayOfWeek'] == 1)
+	tr.insert(len(tr.columns), 'Tuesday', tr['DayOfWeek'] == 2)
+	tr.insert(len(tr.columns), 'Wednesday', tr['DayOfWeek'] == 3)
+	tr.insert(len(tr.columns), 'Thursday', tr['DayOfWeek'] == 4)
+	tr.insert(len(tr.columns), 'Friday', tr['DayOfWeek'] == 5)
+	tr.insert(len(tr.columns), 'Saturday', tr['DayOfWeek'] == 6)
+	tr.insert(len(tr.columns), 'Sunday', tr['DayOfWeek'] == 7)
 
-	tr = util.load_train_data('../data/')
-	ts = util.load_test_data('../data/')
+	ts.insert(len(ts.columns), 'Monday', ts['DayOfWeek'] == 1)
+	ts.insert(len(ts.columns), 'Tuesday', ts['DayOfWeek'] == 2)
+	ts.insert(len(ts.columns), 'Wednesday', ts['DayOfWeek'] == 3)
+	ts.insert(len(ts.columns), 'Thursday', ts['DayOfWeek'] == 4)
+	ts.insert(len(ts.columns), 'Friday', ts['DayOfWeek'] == 5)
+	ts.insert(len(ts.columns), 'Saturday', ts['DayOfWeek'] == 6)
+	ts.insert(len(ts.columns), 'Sunday', ts['DayOfWeek'] == 7)
 
-	ts_id = ts['Store'].unique()
-	for i in ts_id:
-		d_tr = tr[tr['Store'] == i]
+	# date feature
+	# ---- doesnt improve anth ----
+	# tr.insert(len(tr.columns), 'Date_Norm', (tr['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
+	# tr.insert(len(tr.columns), 'Day_Norm', (tr['Date'].dt.day - 1.) / 31.)
+	# tr.insert(len(tr.columns), 'Month_Norm', (tr['Date'].dt.month - 1.) / 12.)
+	# tr.insert(len(tr.columns), 'Year_Norm', (tr['Date'].dt.year - 2013.) / 2.)
 
+	# ts.insert(len(ts.columns), 'Date_Norm', (ts['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
+	# ts.insert(len(ts.columns), 'Day_Norm', (ts['Date'].dt.day - 1.) / 31.)
+	# ts.insert(len(ts.columns), 'Month_Norm', (ts['Date'].dt.month - 1.) / 12.)
+	# ts.insert(len(ts.columns), 'Year_Norm', (ts['Date'].dt.year - 2013.) / 2.)
+
+	# ---- doesnt improve anth ----
+	# tr.insert(len(tr.columns), 'Timestamp', pd.to_datetime(tr['Date']).values.astype(int))
+	# ts.insert(len(ts.columns), 'Timestamp', pd.to_datetime(ts['Date']).values.astype(int))
+
+	store_ids = tr['Store'].unique().astype(int, copy=False)
+
+	# Sales
+	tr.insert(len(tr.columns), 'Sales_Avg', 0.)
+	tr.insert(len(tr.columns), 'Sales_Max', 0.)
+	tr.insert(len(tr.columns), 'Sales_Min', 0.)
+
+	ts.insert(len(ts.columns), 'Sales_Avg', 0.)
+	ts.insert(len(ts.columns), 'Sales_Max', 0.)
+	ts.insert(len(ts.columns), 'Sales_Min', 0.)
+	
+	for store_id in store_ids:
+		mask = tr['Store'] == store_id
+		mask2 = ts['Store'] == store_id
+		ser = tr.loc[mask, 'Sales']
+
+		val = ser.mean()
+		tr.loc[mask, 'Sales_Avg'] = val
+		ts.loc[mask2, 'Sales_Avg'] = val
+
+		val = ser.max()
+		tr.loc[mask, 'Sales_Max'] = val
+		ts.loc[mask2, 'Sales_Max'] = val
+
+		val = ser.min()
+		tr.loc[mask, 'Sales_Min'] = val
+		ts.loc[mask2, 'Sales_Min'] = val
+
+	# Customers
+	tr.insert(len(tr.columns), 'Customers_Avg', 0.)
+	tr.insert(len(tr.columns), 'Customers_Max', 0.)
+	tr.insert(len(tr.columns), 'Customers_Min', 0.)
+
+	ts.insert(len(ts.columns), 'Customers_Avg', 0.)
+	ts.insert(len(ts.columns), 'Customers_Max', 0.)
+	ts.insert(len(ts.columns), 'Customers_Min', 0.)
+
+	for store_id in store_ids:
+		mask = tr['Store'] == store_id
+		mask2 = ts['Store'] == store_id
+		ser = tr.loc[mask, 'Customers']
+
+		val = ser.mean()
+		tr.loc[mask, 'Customers_Avg'] = val
+		ts.loc[mask2, 'Customers_Avg'] = val
+
+		val = ser.max()
+		tr.loc[mask, 'Customers_Max'] = val
+		ts.loc[mask2, 'Customers_Max'] = val
+
+		val = ser.min()
+		tr.loc[mask, 'Customers_Min'] = val
+		ts.loc[mask2, 'Customers_Min'] = val
+
+	return tr,ts
+
+def trainKFold(dtrain, k):
+
+	size = int(len(dtrain) / k)
+
+	models = []
+	scores = []
+
+	for i in range(k):
+		traind = dtrain[:i*size].append(dtrain[(i+1)*size:], ignore_index=True)
+		vald = dtrain[i*size:][:size]
+
+		# training data with validation
 		# x train
-		x_tr = d_tr.copy()
+		x_tr = traind.copy()
 		del x_tr['Store']
 		del x_tr['Date']
+		del x_tr['DayOfWeek']
 		del x_tr['Sales']
 		del x_tr['Customers']
 		del x_tr['StateHoliday']
@@ -116,16 +211,56 @@ def predictPerStore():
 		del x_tr['Std']
 
 		# normalized y train
-		mean = d_tr['Mean']
-		std = d_tr['Std']
-		y_tr = d_tr['Sales']
+		mean_tr = traind['Mean']
+		std_tr = traind['Std']
+		y_tr = traind['Sales']
+		y_tr_norm = (y_tr - mean_tr) / std_tr
 
-		y_tr_norm = (y_tr - mean) / std
+		# val data
+		# x val
+		x_val = vald.copy()
+		del x_val['Store']
+		del x_val['Date']
+		del x_val['DayOfWeek']
+		del x_val['Sales']
+		del x_val['Customers']
+		del x_val['StateHoliday']
+		del x_val['Mean']
+		del x_val['Std']
 
-		# train model
-		print('training for store id : {}'.format(i))
+		# normalized y val
+		mean_val = vald['Mean']
+		std_val = vald['Std']
+		y_val = vald['Sales']
+		y_val_norm = (y_val - mean_val) / std_val
+
 		model = linear_model.Ridge(alpha=1.0)
 		model.fit(x_tr, y_tr_norm)
+
+		models.append(model)
+		scores.append(model.score(x_val, y_val_norm))
+
+	# return model with best score
+	return models[scores.index(max(scores))]
+
+def predictPerStore():
+	# initialize result array
+	result = np.zeros(shape=(41088,2))
+
+	traind = util.load_train_data('../data/')
+	testd = util.load_test_data('../data/')
+
+	# additional features
+	tr, ts = preProcess(traind, testd)
+
+	ts_id = ts['Store'].unique()
+	for i in ts_id:
+		d_tr = tr[tr['Store'] == i]
+		
+		# train using kfold
+		print('training for store id : {}'.format(i))
+		k = 5
+		model = trainKFold(d_tr, k)
 
 		# predict
 		print('predicting for store id : {}'.format(i))
@@ -142,6 +277,7 @@ def predictPerStore():
 		del x_ts['Id']
 		del x_ts['Store']
 		del x_ts['Date']
+		del x_ts['DayOfWeek']
 		del x_ts['StateHoliday']
 		del x_ts['Mean']
 		del x_ts['Std']
@@ -163,18 +299,6 @@ def predictPerStore():
 	
 	result = pd.DataFrame(result)
 	result[0] = result[0].astype(int)
-	result.to_csv('../data/ridge_result_per_store.csv', header=['Id', 'Sales'], index=False)
+	result.to_csv('../data/ridge_result_per_store_5_fold_6.csv', header=['Id', 'Sales'], index=False)
 
 	return True
-
-
-# MAIN
-# x_train, y_train_norm, mean_test, std_test, x_test, y_test = loadData()
-# model = linear_model.Ridge(alpha=1.0)
-# model.fit(x_train, y_train_norm)
-
-# y_predict = model.predict(x_test)
-# y_predict_denorm = (y_predict * std_test) + mean_test
-
-# result = rmspe(y_predict_denorm, y_test)
-# print('RMSPE : {}'.format(result))
