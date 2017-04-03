@@ -25,8 +25,10 @@ with open('dset.pickle', 'rb') as f:
     xtrain = dset['xtrain']
     cont_train = dset['cont_train']
     ytrain = dset['ytrain']
+
     ytrain_de = mean + ytrain * std
     ytrain_mask = ytrain_de >= 1.
+
     idtrain = dset['idtrain']
     daytrain = dset['daytrain']
     monthtrain = dset['monthtrain']
@@ -39,8 +41,10 @@ with open('dset.pickle', 'rb') as f:
     xval = dset['xval']
     cont_val = dset['cont_val']
     yval = dset['yval']
+
     yval_de = mean + yval * std
     yval_mask = yval_de >= 1.
+
     idval = dset['idval']
     dayval = dset['dayval']
     monthval = dset['monthval']
@@ -98,51 +102,26 @@ def train(num_epochs=10, val_every=1):
 
             num_pass += 1
             train_loss += net.blobs['loss'].data.item(0)
-        train_losses.append(train_loss / num_pass)
+        train_loss /= num_pass
+        train_losses.append(train_loss)
+        print 'Train loss: %.9f' % (train_loss)
 
-        if epoch % val_every == 0:
-            val_x.append(epoch - 1)
-
-            preds = np.zeros(len(xval))
-            for t in range(0, len(xval), batch_size):
-                test_net.blobs['cont'].data[:, 0] = cont_val[t:t+batch_size]
-                test_net.blobs['store_id'].data[:, 0] = idval[t:t+batch_size]
-                test_net.blobs['day'].data[:, 0] = dayval[t:t+batch_size]
-                test_net.blobs['month'].data[:, 0] = monthval[t:t+batch_size]
-                test_net.blobs['year'].data[:, 0] = yearval[t:t+batch_size]
-                test_net.blobs['dow'].data[:, 0] = dowval[t:t+batch_size]
-                test_net.blobs['sth'].data[:, 0] = sthval[t:t+batch_size]
-                test_net.blobs['stype'].data[:, 0] = stypeval[t:t+batch_size]
-                test_net.blobs['atype'].data[:, 0] = atypeval[t:t+batch_size]
-                test_net.blobs['data'].data[:, 0] = xval[t:t+batch_size]
-                preds[t:t+batch_size] = test_net.forward()['output'][:, 0]
-            preds_de = mean + preds * std
-
-            loss = np.sum((yval - preds)**2)/len(xval)
-            val_losses.append(loss)
-
-            rmspe = np.sqrt( np.sum( ((yval_de[yval_mask]-preds_de[yval_mask])/yval_de[yval_mask])**2 )/yval_mask.sum() )
-            print 'Val samples loss: %.9f, rmspe: %.9f' % (loss, rmspe)
-
-            if loss < min_loss:
-                min_loss = loss
-                net.save('lstm.caffemodel')
+        if train_loss < min_loss:
+            min_loss = train_loss
+            net.save('lstm.caffemodel')
 
     net = caffe.Net('lstm.prototxt', 'lstm.caffemodel', caffe.TEST)
 
-    plt.subplots()
-    plt.plot(np.arange(len(train_losses)), train_losses, '-b')
-    plt.plot(val_x, val_losses, '-r')
-    plt.show()
-
     return net
 
-net = train(25, 1)
+net = train(65, 1)
 
 def test(net):
+    ansed = set()
     with open('submission.csv', 'w') as f:
         for ansid in closed:
             f.write('%d,%.15f\n' % (ansid, 0.))
+            ansed.add(ansid)
 
     num_ts = len(xtest)
     preds = np.zeros(num_ts)
@@ -156,10 +135,15 @@ def test(net):
         net.blobs['sth'].data[:, 0] = sthtest[t:t+batch_size]
         net.blobs['stype'].data[:, 0] = stypetest[t:t+batch_size]
         net.blobs['atype'].data[:, 0] = atypetest[t:t+batch_size]
-        net.blobs['data'].data[:] = xtest[t:t+batch_size]
+        net.blobs['data'].data[:, 0] = xtest[t:t+batch_size]
         preds[t:t+batch_size] = net.forward()['output'][:, 0]
     preds = mean + preds * std
 
     with open('submission.csv', 'a') as f:
         for i in range(len(submid)):
+            if submid[i] in ansed:
+                continue
             f.write('%d,%.15f\n' % (submid[i], preds[i]))
+            ansed.add(submid[i])
+
+test(net)

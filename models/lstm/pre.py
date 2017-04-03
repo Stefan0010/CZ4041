@@ -28,7 +28,7 @@ testd.sort_values(['Store', 'Date'], ascending=True, inplace=True)
 batch_size = 5000
 
 # Slice validation set
-num_val_stores = 50
+num_val_stores = 10
 shuffledids = np.arange(1, 1116)
 np.random.shuffle(shuffledids)
 idval = shuffledids[:num_val_stores]
@@ -37,15 +37,8 @@ val_mask = traind['Store'] == idval[0]
 for i in range(1, num_val_stores):
     val_mask = val_mask | (traind['Store'] == idval[i])
 
-vald = traind.loc[val_mask]
-traind = traind.loc[~val_mask]
-
-# Helper function
-def znorm(df1, df2, column):
-    mean = df1[column].mean()
-    std = df1[column].std()
-    df1.loc[:, column] = (df1[column] - mean) / std
-    df2.loc[:, column] = (df2[column] - mean) / std
+vald = traind.loc[val_mask].copy()
+# traind = traind.loc[~val_mask]
 
 print 'Starting preprocessing'
 
@@ -59,7 +52,7 @@ store_ids = traind['Store'].unique().astype(int, copy=False)
 
 idtrain = traind['Store'].as_matrix().astype(int, copy=False)
 idval = vald['Store'].as_matrix().astype(int, copy=False)
-idtest = testd.loc[days_open, 'Store'].as_matrix().astype(int, copy=False)
+idtest = testd['Store'].as_matrix().astype(int, copy=False)
 
 # DayOfWeek
 traind.loc[:, 'DayOfWeek'] -= 1
@@ -68,7 +61,7 @@ testd.loc[:, 'DayOfWeek'] -= 1
 
 dowtrain = traind['DayOfWeek'].as_matrix().astype(int, copy=False)
 dowval = vald['DayOfWeek'].as_matrix().astype(int, copy=False)
-dowtest = testd.loc[days_open, 'DayOfWeek'].as_matrix().astype(int, copy=False)
+dowtest = testd['DayOfWeek'].as_matrix().astype(int, copy=False)
 
 # Date
 daytrain = traind['Date'].dt.day.as_matrix().astype(int, copy=False) - 1
@@ -79,9 +72,9 @@ dayval = vald['Date'].dt.day.as_matrix().astype(int, copy=False) - 1
 monthval = vald['Date'].dt.month.as_matrix().astype(int, copy=False) - 1
 yearval = vald['Date'].dt.year.as_matrix().astype(int, copy=False) - 2013
 
-daytest = testd.loc[days_open, 'Date'].dt.day.as_matrix().astype(int, copy=False) - 1
-monthtest = testd.loc[days_open, 'Date'].dt.month.as_matrix().astype(int, copy=False) - 1
-yeartest = testd.loc[days_open, 'Date'].dt.year.as_matrix().astype(int, copy=False) - 2013
+daytest = testd['Date'].dt.day.as_matrix().astype(int, copy=False) - 1
+monthtest = testd['Date'].dt.month.as_matrix().astype(int, copy=False) - 1
+yeartest = testd['Date'].dt.year.as_matrix().astype(int, copy=False) - 2013
 
 # Sales
 mean = traind['Sales'].mean()
@@ -111,7 +104,7 @@ def mapper(val):
 
 sthtrain = traind['StateHoliday'].map(mapper).as_matrix().astype(int, copy=False)
 sthval = vald['StateHoliday'].map(mapper).as_matrix().astype(int, copy=False)
-sthtest = testd.loc[days_open, 'StateHoliday'].map(mapper).as_matrix().astype(int, copy=False)
+sthtest = testd['StateHoliday'].map(mapper).as_matrix().astype(int, copy=False)
 
 del traind['StateHoliday']
 del vald['StateHoliday']
@@ -160,10 +153,10 @@ stypeval[vald['StoreType_b'].as_matrix() == 1] = 1
 stypeval[vald['StoreType_c'].as_matrix() == 1] = 2
 stypeval[vald['StoreType_d'].as_matrix() == 1] = 3
 
-stypetest = np.zeros(days_open.sum())
-stypetest[testd.loc[days_open, 'StoreType_b'].as_matrix() == 1] = 1
-stypetest[testd.loc[days_open, 'StoreType_c'].as_matrix() == 1] = 2
-stypetest[testd.loc[days_open, 'StoreType_d'].as_matrix() == 1] = 3
+stypetest = np.zeros(len(testd))
+stypetest[testd['StoreType_b'].as_matrix() == 1] = 1
+stypetest[testd['StoreType_c'].as_matrix() == 1] = 2
+stypetest[testd['StoreType_d'].as_matrix() == 1] = 3
 
 del traind['StoreType_a']
 del vald['StoreType_a']
@@ -193,9 +186,9 @@ atypeval = np.zeros(len(vald))
 atypeval[vald['Assortment_b'].as_matrix() == 1] = 1
 atypeval[vald['Assortment_c'].as_matrix() == 1] = 2
 
-atypetest = np.zeros(days_open.sum())
-atypetest[testd.loc[days_open, 'Assortment_b'].as_matrix() == 1] = 1
-atypetest[testd.loc[days_open, 'Assortment_c'].as_matrix() == 1] = 2
+atypetest = np.zeros(len(testd))
+atypetest[testd['Assortment_b'].as_matrix() == 1] = 1
+atypetest[testd['Assortment_c'].as_matrix() == 1] = 2
 
 del traind['Assortment_a']
 del vald['Assortment_a']
@@ -231,9 +224,9 @@ ytrain = traind['Sales'].as_matrix().astype(float, copy=False)
 xval = vald.drop(['Store', 'DayOfWeek', 'Date', 'Sales'], axis=1).as_matrix().astype(float, copy=False)
 yval = vald['Sales'].as_matrix().astype(float, copy=False)
 
-submid = testd.loc[days_open, 'Id'].as_matrix().astype(int, copy=False)
+submid = testd['Id'].as_matrix().astype(int, copy=False)
 closed = testd.loc[~days_open, 'Id'].as_matrix().astype(int, copy=False)
-xtest = testd.loc[days_open].drop(['Id', 'Store', 'DayOfWeek', 'Date'], axis=1).as_matrix().astype(float, copy=False)
+xtest = testd.drop(['Id', 'Store', 'DayOfWeek', 'Date'], axis=1).as_matrix().astype(float, copy=False)
 
 assert len(xtrain) == len(idtrain) == len(daytrain) == len(monthtrain) == len(yeartrain) == len(dowtrain)
 assert len(xtrain) == len(sthtrain) == len(stypetrain) == len(atypetrain)

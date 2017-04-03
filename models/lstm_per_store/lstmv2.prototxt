@@ -4,60 +4,47 @@ layer {
     name: "data"
     type: "Input"
     top: "data"
-    include {
-        phase: TRAIN
-    }
-    input_param {
-        shape {
-            dim: 500
-            dim: 1
-            dim: 15
-        }
-    }
-}
-
-layer {
-    name: "dow"
-    type: "Input"
-    top: "dow"
-    include {
-        phase: TRAIN
-    }
-    input_param {
-        shape {
-            dim: 500
-            dim: 1
-        }
-    }
-}
-
-layer {
-    name: "sth"
-    type: "Input"
-    top: "sth"
-    include {
-        phase: TRAIN
-    }
-    input_param {
-        shape {
-            dim: 500
-            dim: 1
-        }
-    }
-}
-
-layer {
-    name: "data"
-    type: "Input"
-    top: "data"
-    include {
-        phase: TEST
-    }
     input_param {
         shape {
             dim: 50
             dim: 1
-            dim: 15
+            dim: 4
+        }
+    }
+}
+
+layer {
+    name: "day"
+    type: "Input"
+    top: "day"
+    input_param {
+        shape {
+            dim: 50
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "month"
+    type: "Input"
+    top: "month"
+    input_param {
+        shape {
+            dim: 50
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "year"
+    type: "Input"
+    top: "year"
+    input_param {
+        shape {
+            dim: 50
+            dim: 1
         }
     }
 }
@@ -66,9 +53,6 @@ layer {
     name: "dow"
     type: "Input"
     top: "dow"
-    include {
-        phase: TEST
-    }
     input_param {
         shape {
             dim: 50
@@ -81,9 +65,6 @@ layer {
     name: "sth"
     type: "Input"
     top: "sth"
-    include {
-        phase: TEST
-    }
     input_param {
         shape {
             dim: 50
@@ -96,6 +77,57 @@ layer {
     name: "embed1"
     type: "Embed"
     top: "embed1"
+    bottom: "day"
+    embed_param {
+        input_dim: 31
+        num_output: 7
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "embed2"
+    type: "Embed"
+    top: "embed2"
+    bottom: "month"
+    embed_param {
+        input_dim: 12
+        num_output: 4
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "embed3"
+    type: "Embed"
+    top: "embed3"
+    bottom: "year"
+    embed_param {
+        input_dim: 3
+        num_output: 2
+        weight_filler {
+            type: "xavier"
+        }
+        bias_filler {
+            type: "constant"
+        }
+    }
+}
+
+layer {
+    name: "embed4"
+    type: "Embed"
+    top: "embed4"
     bottom: "dow"
     embed_param {
         input_dim: 7
@@ -110,9 +142,9 @@ layer {
 }
 
 layer {
-    name: "embed2"
+    name: "embed5"
     type: "Embed"
-    top: "embed2"
+    top: "embed5"
     bottom: "sth"
     embed_param {
         input_dim: 4
@@ -130,24 +162,6 @@ layer {
     name: "cont"
     type: "Input"
     top: "cont"
-    include {
-        phase: TRAIN
-    }
-    input_param {
-        shape {
-            dim: 500
-            dim: 1
-        }
-    }
-}
-
-layer {
-    name: "cont"
-    type: "Input"
-    top: "cont"
-    include {
-        phase: TEST
-    }
     input_param {
         shape {
             dim: 50
@@ -165,7 +179,7 @@ layer {
     }
     input_param {
         shape {
-            dim: 500
+            dim: 50
             dim: 1
         }
     }
@@ -176,7 +190,11 @@ layer {
     type: "Concat"
     bottom: "embed1"
     bottom: "embed2"
+    bottom: "embed3"
+    bottom: "embed4"
+    bottom: "embed5"
     bottom: "data"
+    top: "concat1"
     concat_param {
         axis: 2
     }
@@ -190,10 +208,10 @@ layer {
     top: "lstm1"
 
     recurrent_param {
-        num_output: 50
+        num_output: 32
         weight_filler {
             type: "gaussian"
-            std: 0.2
+            std: 0.15
         }
         bias_filler {
             type: "constant"
@@ -202,13 +220,23 @@ layer {
 }
 
 layer {
+    name: "do1"
+    type: "Dropout"
+    top: "do1"
+    bottom: "lstm1"
+    dropout_param {
+        dropout_ratio: 0.1
+    }
+}
+
+layer {
     name: "ip1"
     type: "InnerProduct"
-    bottom: "lstm1"
+    bottom: "do1"
     top: "ip1"
 
     inner_product_param {
-        num_output: 50
+        num_output: 32
         weight_filler {
             type: "xavier"
         }
@@ -219,9 +247,19 @@ layer {
 }
 
 layer {
+    name: "do2"
+    type: "Dropout"
+    top: "do2"
+    bottom: "ip1"
+    dropout_param {
+        dropout_ratio: 0.1
+    }
+}
+
+layer {
     name: "output"
     type: "InnerProduct"
-    bottom: "ip1"
+    bottom: "do2"
     top: "output"
 
     inner_product_param {
