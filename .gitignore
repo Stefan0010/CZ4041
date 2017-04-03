@@ -92,6 +92,8 @@ ENV/
 *.csv
 *.zip
 *.tar.gz
+*./src/dita/
+*./src/normalise_with_val_std_perstore.py
 !merged.tar.gz
 !splitted.tar.gz
 !1000_split_rf.csv
