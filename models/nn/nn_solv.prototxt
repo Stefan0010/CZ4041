@@ -1,10 +1,17 @@
-net: "nn_3_layer.prototxt"
+net: "nn.prototxt"
+
 test_iter: 1
 test_interval: 100000000
-type: "SGD"
-base_lr: 0.001
+
+type: "Nesterov"
 momentum: 0.9
-lr_policy: "fixed"
+
+base_lr:  0.01
+lr_policy: "inv"
+gamma: 0.000001
+power: 1
+
 display: 100
 average_loss: 100
+
 solver_mode: GPU

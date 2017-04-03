@@ -1,4 +1,4 @@
-name: "LSTM Simple per Store v2"
+name: "LSTM Simple"
 
 layer {
     name: "data"
@@ -6,8 +6,9 @@ layer {
     top: "data"
     input_param {
         shape: {
+            dim: 5000
             dim: 1
-            dim: 19
+            dim: 36
         }
     }
 }
@@ -18,7 +19,7 @@ layer {
     top: "cont"
     input_param {
         shape: {
-            dim: 1
+            dim: 5000
             dim: 1
         }
     }
@@ -33,40 +34,8 @@ layer {
     }
     input_param {
         shape: {
+            dim: 5000
             dim: 1
-            dim: 1
-        }
-    }
-}
-
-layer {
-    name: "ip1"
-    type: "InnerProduct"
-    bottom: "data"
-    top: "ip1"
-
-    inner_product_param {
-        num_output: 128
-        weight_filler {
-            type: "xavier",
-            variance_norm: AVERAGE
-        }
-        bias_filler {
-            type: "constant"
-        }
-    }
-}
-
-layer {
-    name: "reshape1",
-    type: "Reshape",
-    bottom: "ip1",
-    top: "reshape1",
-    reshape_param {
-        shape {
-            dim: 1
-            dim: 1
-            dim: 128
         }
     }
 }
@@ -74,15 +43,17 @@ layer {
 layer {
     name: "lstm1"
     type: "LSTM"
-    bottom: "reshape1"
+    bottom: "data"
     bottom: "cont"
     top: "lstm1"
 
+    param { lr_mult: 1 }
+    param { lr_mult: 2 }
+
     recurrent_param {
-        num_output: 128
+        num_output: 64
         weight_filler {
-            type: "gaussian",
-            std: 0.25,
+            type: "xavier"
         }
         bias_filler {
             type: "constant"
@@ -96,11 +67,13 @@ layer {
     bottom: "lstm1"
     top: "ip2"
 
+    param { lr_mult: 1 }
+    param { lr_mult: 2 }
+
     inner_product_param {
-        num_output: 128
+        num_output: 64
         weight_filler {
-            type: "xavier",
-            variance_norm: AVERAGE
+            type: "xavier"
         }
         bias_filler {
             type: "constant"
@@ -114,11 +87,13 @@ layer {
     bottom: "ip2"
     top: "output"
 
+    param { lr_mult: 1 }
+    param { lr_mult: 2 }
+
     inner_product_param {
         num_output: 1
         weight_filler {
-            type: "xavier",
-            variance_norm: AVERAGE
+            type: "xavier"
         }
         bias_filler {
             type: "constant"
