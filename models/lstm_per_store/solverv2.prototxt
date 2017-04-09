@@ -1,4 +1,4 @@
-net: "lstmv2.prototxt"
+net: "lstmv2_1.prototxt"
 
 test_iter: 1
 test_interval: 100000000

@@ -1,13 +1,33 @@
-name: "LSTM Simple per Store v2"
+name: "LSTM Simple per Store v2_1"
 
 layer {
     name: "data"
     type: "Input"
     top: "data"
+    include {
+        phase: TRAIN
+    }
     input_param {
-        shape: {
+        shape {
             dim: 500
-            dim: 13
+            dim: 1
+            dim: 15
+        }
+    }
+}
+
+layer {
+    name: "data"
+    type: "Input"
+    top: "data"
+    include {
+        phase: TEST
+    }
+    input_param {
+        shape {
+            dim: 50
+            dim: 1
+            dim: 15
         }
     }
 }
@@ -16,9 +36,27 @@ layer {
     name: "cont"
     type: "Input"
     top: "cont"
+    include {
+        phase: TRAIN
+    }
     input_param {
-        shape: {
+        shape {
             dim: 500
+            dim: 1
+        }
+    }
+}
+
+layer {
+    name: "cont"
+    type: "Input"
+    top: "cont"
+    include {
+        phase: TEST
+    }
+    input_param {
+        shape {
+            dim: 50
             dim: 1
         }
     }
@@ -28,44 +66,13 @@ layer {
     name: "target"
     type: "Input"
     top: "target"
-    include: {
+    include {
         phase: TRAIN
     }
     input_param {
-        shape: {
-            dim: 500
-            dim: 1
-        }
-    }
-}
-
-layer {
-    name: "ip1"
-    type: "InnerProduct"
-    bottom: "data"
-    top: "ip1"
-
-    inner_product_param {
-        num_output: 32
-        weight_filler {
-            type: "xavier"
-        }
-        bias_filler {
-            type: "constant"
-        }
-    }
-}
-
-layer {
-    name: "reshape1"
-    type: "Reshape"
-    bottom: "ip1"
-    top: "reshape1"
-    reshape_param {
         shape {
             dim: 500
             dim: 1
-            dim: 32
         }
     }
 }
@@ -73,14 +80,15 @@ layer {
 layer {
     name: "lstm1"
     type: "LSTM"
-    bottom: "reshape1"
+    bottom: "data"
     bottom: "cont"
     top: "lstm1"
 
     recurrent_param {
         num_output: 32
         weight_filler {
-            type: "xavier"
+            type: "gaussian"
+            std: 0.2
         }
         bias_filler {
             type: "constant"
@@ -89,10 +97,10 @@ layer {
 }
 
 layer {
-    name: "ip2"
+    name: "ip1"
     type: "InnerProduct"
     bottom: "lstm1"
-    top: "ip2"
+    top: "ip1"
 
     inner_product_param {
         num_output: 32
@@ -108,7 +116,7 @@ layer {
 layer {
     name: "output"
     type: "InnerProduct"
-    bottom: "ip2"
+    bottom: "ip1"
     top: "output"
 
     inner_product_param {

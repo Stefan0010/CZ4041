@@ -16,18 +16,22 @@ sys.path.append('C:\\Users\\Peter\\Documents\\GitHub\\CZ4041')
 from src import util
 
 # Some constants
-batch_size = 500
+batch_size = {
+    'train': 500,
+    'val': 50,
+    'test': 50,
+}
 
 # Load train & test data
 data_dir = '../data'
 
-with open('dsetv3.pickle', 'rb') as f:
+with open('dsetv4.pickle', 'rb') as f:
     dset = pickle.load(f)
     stores = dset['stores']
     zeroes = dset['zeroes']
     del dset
 
-def train(store_id, num_epoch=100, solver_prototxt='solverv2_1.prototxt'):
+def train(store_id, num_epoch=300, val_every=6):
     net_fname = os.path.join('temp', '_%d.caffemodel' % store_id)
 
     print '+=============================================================================+'
@@ -36,75 +40,71 @@ def train(store_id, num_epoch=100, solver_prototxt='solverv2_1.prototxt'):
 
     start_time = time.time()
 
-    solver = caffe.get_solver(solver_prototxt)
+    solver = caffe.get_solver('solverv2_1.prototxt')
     net = solver.net
-    # losses = []
+    test_net = solver.test_nets[0]
 
-    x = stores[store_id]['x']
-    y = stores[store_id]['y']
-    cont = stores[store_id]['cont']
     mean = stores[store_id]['mean']
     std = stores[store_id]['std']
-    num_ts = len(x)
+    xtrain = stores[store_id]['xtrain']
+    ytrain = stores[store_id]['ytrain']
+    ytrain_de = mean + ytrain * std
+    ytrain_mask = ytrain_de >= 1.0
+    cont_train = stores[store_id]['cont_train']
+    train_iter = 0
+    # train_losses = []
 
-    prev_loss = float('inf')
+    xval = stores[store_id]['xval']
+    yval = stores[store_id]['yval']
+    cont_val = stores[store_id]['cont_val']
+    yval_de = mean + yval * std
+    yval_mask = yval_de >= 1.0
+    # val_x = []
+    # val_losses = []
+
+    num_ts = len(xtrain)
+
+    min_loss = float('inf')
     for epoch in range(1,num_epoch+1):
-        for t in range(0, num_ts, batch_size):
-            net.blobs['data'].data[:] = x[t:t+batch_size]
-            net.blobs['cont'].data[:, 0] = cont[t:t+batch_size]
-            net.blobs['target'].data[:, 0] = y[t:t+batch_size]
+        for t in range(0, num_ts, batch_size['train']):
+            net.blobs['data'].data[:, 0] = xtrain[t:t+batch_size['train']]
+            net.blobs['cont'].data[:, 0] = cont_train[t:t+batch_size['train']]
+            net.blobs['target'].data[:, 0] = ytrain[t:t+batch_size['train']]
             solver.step(1)
 
-            # losses.append(net.blobs['loss'].data.item(0))
-            curr_loss = net.blobs['loss'].data.item(0)
-            if epoch * 2 >= num_epoch and curr_loss < prev_loss:
-                prev_loss = curr_loss
+            # train_losses.append(net.blobs['loss'].data.item(0))
+            train_iter += 1
+
+        if epoch % val_every == 0:
+            preds = np.zeros(len(xval))
+            for t in range(0, len(xval), batch_size['val']):
+                test_net.blobs['data'].data[:, 0] = xval[t:t+batch_size['val']]
+                test_net.blobs['cont'].data[:, 0] = cont_val[t:t+batch_size['val']]
+                preds[t:t+batch_size['val']] = test_net.forward()['output'][:, 0]
+            loss = np.sum( (preds-yval)**2 )/len(xval)
+
+            preds_de = mean + preds * std
+            rmspe = np.sqrt( np.sum(((preds_de[yval_mask]-yval_de[yval_mask])/yval_de[yval_mask])**2)/yval_mask.sum() )
+
+            # val_x.append(train_iter - 1)
+            # val_losses.append(loss)
+
+            # print 'Val 50 samples, loss: %.9f, rmspe: %.9f' % (loss, rmspe)
+            if loss < min_loss:
+                min_loss = loss
                 solver.net.save(net_fname)
 
     print '+=============================================================================+'
-    print '| Testing store % 4d, time taken: %.9f' % (store_id, time.time() - start_time)
+    # print '| Testing store % 4d, time taken: %.9f' % (store_id, time.time() - start_time)
+    print '| Time taken: %.9f' % (time.time() - start_time)
     print '+=============================================================================+'
 
-    test_net = caffe.Net('lstmv2_1.prototxt', net_fname, caffe.TEST)
-
-    # Peek again after training
-    preds = np.zeros(num_ts)
-    for t in range(0, num_ts, batch_size):
-        test_net.blobs['data'].data[:] = x[t:t+batch_size]
-        test_net.blobs['cont'].data[:, 0] = cont[t:t+batch_size]
-        preds[t:t+batch_size] = test_net.forward()['output'][:, 0]
-
-    # Reconstruct
-    y_de = mean + y * std
-    preds = mean + preds * std
-
-    # Avoid division by small number
-    mask = y_de >= 1.
-
-    RMSE  = np.sqrt( np.sum((y_de-preds)**2)/num_ts )
-    RMSPE = np.sqrt( np.sum(((y_de[mask]-preds[mask])/y_de[mask])**2)/mask.sum() )
-    print 'RMSE  : %.9f' % RMSE
-    print 'RMSPE : %.9f' % RMSPE
-
-    # Plot losses
     # plt.subplots()
-    # plt.subplots_adjust(left=0.025, bottom=0.025, right=1.0, top=1.0, wspace=0., hspace=0.)
-    # plt.xlim(0, len(losses))
-    # plt.ylim(0, max(losses))
-    # plt.plot(np.arange(len(losses)), losses)
-
-    # Plot prediction vs. actual
-    # plt.subplots()
-    # plt.subplots_adjust(left=0.025, bottom=0.025, right=1.0, top=1.0, wspace=0., hspace=0.)
-    # plt.xlim(0, num_ts)
-    # y_min=min(preds.min(), y_de.min())
-    # y_max=max(preds.max(), y_de.max())
-    # plt.ylim(y_min, y_max)
-    # plt.plot(np.arange(num_ts), y_de, '-b')
-    # plt.plot(np.arange(num_ts), preds, '-r')
+    # plt.plot(np.arange(len(train_losses)), train_losses, '-b')
+    # plt.plot(val_x, val_losses, '-r')
     # plt.show()
 
-    return solver
+    return caffe.Net('lstmv2_1.prototxt', net_fname, caffe.TEST)
 
 def predict(store_id, net):
     xtest = stores[store_id]['xtest']
@@ -115,22 +115,22 @@ def predict(store_id, net):
     num_ts = len(xtest)
 
     preds = np.zeros(num_ts)
-    for t in range(0, num_ts, batch_size):
-        net.blobs['data'].data[:] = xtest[t:t+batch_size]
-        net.blobs['cont'].data[:, 0] = cont_test[t:t+batch_size]
-        preds[t:t+batch_size] = net.forward()['output'][:, 0]
+    for t in range(0, num_ts, batch_size['test']):
+        net.blobs['data'].data[:, 0] = xtest[t:t+batch_size['test']]
+        net.blobs['cont'].data[:, 0] = cont_test[t:t+batch_size['test']]
+        preds[t:t+batch_size['test']] = net.forward()['output'][:, 0]
 
     preds = mean + preds * std
 
-    with open('submission.csv', 'a') as f:
+    with open('submission2.csv', 'a') as f:
         for i in range(len(submid)):
             f.write('%d,%.15f\n' % (submid[i], preds[i]))
 
-with open('submission.csv', 'w') as f:
+with open('submission2.csv', 'w') as f:
     for store_id in zeroes:
         f.write('%d,%.15f\n' % (store_id, 0.))
 
 for store_id in stores:
     net_fname = os.path.join('temp', '_%d.caffemodel' % store_id)
-    solver = train(store_id, 300)
-    predict(store_id, caffe.Net('lstmv2_1.prototxt', net_fname, caffe.TEST))
+    net = train(store_id, 200, 4)
+    predict(store_id, net)

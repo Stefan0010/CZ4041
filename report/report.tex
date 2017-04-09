@@ -31,40 +31,19 @@
 \usepackage{float}
 \usepackage{url}
 
-% my package
+% my usepackage
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{titlesec}
+
+\titleformat{\chapter}
+{\normalfont\huge\bfseries}{\thechapter.}{20pt}{\huge}
 
 % my def
 \definecolor{light-gray}{HTML}{CCCCCC}
 
 \begin{document}
-\begin{titlepage}
-	\begin{center}
-		
-		% school logo
-		\includegraphics[width=1\textwidth]{./ntu_logo.png}
-		\\[5cm]
-		
-		% project title
-		\uppercase{\textbf{CZ4041 -- MACHINE LEARNING}}
-		\\[5cm]
-		
-		% submited by ...
-		\uppercase{
-			\textbf{
-				PETER
-		}}
-		
-		\vfill
-		
-		% Bottom of the page
-		\textsc{\bfseries SCHOOL OF COMPUTER ENGINEERING}
-		\\
-		\textbf{2016/17}
-		
-	\end{center}
-\end{titlepage}
+\input{cover.tex}
 
 % abstract
 \setcounter{page}{1}
@@ -85,6 +64,13 @@
 % intro chapter
 \cleardoublepage
 \pagenumbering{arabic}
-\input{body.tex}
+\input{intro.tex}
+\input{experiments.tex}
+\input{lstm.tex}
+\input{nn.tex}
+% Other models here
+\input{results.tex}
+\input{conclusion.tex}
+
 
 \end{document}
