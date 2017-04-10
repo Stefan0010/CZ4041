@@ -1,2 +1,16 @@
 \section{Neural Network}
-Lorem ipsum dolor sit amet.
+Our neural network model requires Caffe framework as well, along with CUDA 8 and cuDNN v5.1. This model is also trained on the same Nvidia GTX 850m as before. \\ \\
+There are few preprocessing steps that are specific to this approach. First, we add four extra features, maximum sales, average sales, maximum customers, and average customers. Note that maximum sales are only specific to each store, i.e., maximum sales is not a global max, instead it is maximum sales of a store in the training dataset. The same thing applies for average sales, maximum customers, and average customers. Then, we drop \textit{Customers} column as it is not available in the training dataset. Finally, normalize non-boolean features, such as maximum sales, average sales, maximum customers, average customers, and competition distance. \\ \\
+Our neural network model consists of, in this particular order, an input layer, an embedding layer, two fully-connected layers, and an output layer. The first fully connected layer has 128 neurons, and the second fully connected layer has 64 neurons. Not all features in the input layer are embedded. Features that are embedded include \textit{StoreID}, \textit{DayOfWeek}, \textit{Day}, \textit{Month}, \textit{Year}, \textit{StateHoliday}, \textit{StoreType}, and \textit{Assortment}. \\ \\
+The training algorithm used is Nesterov's accelerated gradient descent with decaying learning rate. The learning rate decay equation is identical to equation \ref{eq:decay_lr}. The momentum is set to $0.9$, and base learning rate is $0.01$. The model is trained for 35 epochs with $10000$ random training samples set aside for validation. \\ \\
+The performance result by this model according to Kaggle, is shown in the table below.
+\begin{table}[h]
+	\centering
+	\caption{Neural network with embedding layer's result}
+	\label{tab:nn_result}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.20356 \\ \hline
+		Public score  & 0.20298 \\ \hline
+	\end{tabular}
+\end{table}
