@@ -1,0 +1,60 @@
+\section{Lasso Regression} \label{sc:lasso}
+Besides neural network, we explored linear regression methods to solve the given challenge as well.
+
+\subsection{Background}
+Lasso regression is an extension of Ordinary Least Square (OLS) regression. The most notable difference between Lasso and OLS is the existence of L1 regularization term in Lasso.
+\begin{equation}
+\label{eq:l1_regularization}
+\lambda \sum_{i=0}^{N} |w_i|
+\end{equation}
+The L1 regularization term is defined as the summation of the absolute of the weight for each features, multiplied by the penalty weight of $\lambda$. The L1 regularization term is included to the error term in OLS regression. The objective of defining a regularization term is to constraint the value of w in order to avoid overfitting the model
+
+\subsection{Implementation}
+The implementation of Lasso regression model is done using Scikit Learn Library in Python, along with supporting libraries such as Pandas and Numpy.
+
+\subsection{Model Training \& Testing}
+During the training and testing phase, the Lasso model was trained with different training methods, and the difference was observed based on the model's performance in the competition leaderboard.
+
+\subsubsection{Merged and Normalized Train Test}
+This phase trains the Lasso model using the preprocessed training and testing data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding.\\
+Additionally, the \textit{Sales} column is normalized (using global mean and standard deviation of \textit{Sales}) during training and denormalized during testing.\\
+The performance of this training type is measured with RMSPE according to Kaggle, as shown in table \ref{tab:lasso_merged_norm_result}
+\begin{table}[h]
+	\centering
+	\caption{Merged Normalized Lasso Result}
+	\label{tab:lasso_merged_norm_result}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.24082 \\ \hline
+		Public score  & 0.22302 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{Train Test per Store}
+The data used in this phase is the merged training and testing data from Section \ref{ch:preprocessing}. In addition, the \textit{Sales} data is normalized with regards to the mean and standard deviation of each store. Furthermore, a unique predictive model is defined for each store ID.\\
+The result of this model can be observed in table \ref{tab:lasso_result_per_store}.
+
+\begin{table}[h]
+	\centering
+	\caption{Lasso Result per Store}
+	\label{tab:lasso_result_per_store}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.23920 \\ \hline
+		Public score  & 0.23479 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{K-Fold Validation}
+In addition to training and testing per store, this step performs a 5-fold validation on each predictive model during the training phase. Using the model with the best validation score, the model is then used to predict the sales of the respective store.
+
+\begin{table}[h]
+	\centering
+	\caption{5-Fold Validation Lasso Result}
+	\label{tab:lasso_result_5_fold}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.25260 \\ \hline
+		Public score  & 0.25426 \\ \hline
+	\end{tabular}
+\end{table}

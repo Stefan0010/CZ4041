@@ -10,5 +10,12 @@
 \contentsline {chapter}{\numberline {3}Experiments}{4}{chapter.3}
 \contentsline {section}{\numberline {3.1}LSTM}{4}{section.3.1}
 \contentsline {section}{\numberline {3.2}Neural Network}{6}{section.3.2}
-\contentsline {chapter}{\numberline {4}Results}{7}{chapter.4}
-\contentsline {chapter}{\numberline {5}Conclusion}{8}{chapter.5}
+\contentsline {section}{\numberline {3.3}Lasso Regression}{7}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Background}{7}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}Implementation}{7}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}Model Training \& Testing}{7}{subsection.3.3.3}
+\contentsline {subsubsection}{Merged and Normalized Train Test}{7}{subsection.3.3.3}
+\contentsline {subsubsection}{Train Test per Store}{8}{table.caption.7}
+\contentsline {subsubsection}{K-Fold Validation}{8}{table.caption.8}
+\contentsline {chapter}{\numberline {4}Results}{9}{chapter.4}
+\contentsline {chapter}{\numberline {5}Conclusion}{10}{chapter.5}
