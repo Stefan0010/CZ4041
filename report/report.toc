@@ -5,6 +5,7 @@
 \contentsline {section}{\numberline {1.1}Team Members}{1}{section.1.1}
 \contentsline {section}{\numberline {1.2}Problem Statement}{1}{section.1.2}
 \contentsline {subsection}{\numberline {1.2.1}Challenge}{1}{subsection.1.2.1}
+\contentsline {subsection}{\numberline {1.2.2}Data}{1}{subsection.1.2.2}
 \contentsline {chapter}{\numberline {2}Preprocessing}{2}{chapter.2}
 \contentsline {chapter}{\numberline {3}Experiments}{4}{chapter.3}
 \contentsline {section}{\numberline {3.1}LSTM}{4}{section.3.1}

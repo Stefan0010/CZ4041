@@ -5,9 +5,10 @@
 \BOOKMARK [1][-]{section.1.1}{Team Members}{chapter.1}% 5
 \BOOKMARK [1][-]{section.1.2}{Problem Statement}{chapter.1}% 6
 \BOOKMARK [2][-]{subsection.1.2.1}{Challenge}{section.1.2}% 7
-\BOOKMARK [0][-]{chapter.2}{Preprocessing}{}% 8
-\BOOKMARK [0][-]{chapter.3}{Experiments}{}% 9
-\BOOKMARK [1][-]{section.3.1}{LSTM}{chapter.3}% 10
-\BOOKMARK [1][-]{section.3.2}{Neural Network}{chapter.3}% 11
-\BOOKMARK [0][-]{chapter.4}{Results}{}% 12
-\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 13
+\BOOKMARK [2][-]{subsection.1.2.2}{Data}{section.1.2}% 8
+\BOOKMARK [0][-]{chapter.2}{Preprocessing}{}% 9
+\BOOKMARK [0][-]{chapter.3}{Experiments}{}% 10
+\BOOKMARK [1][-]{section.3.1}{LSTM}{chapter.3}% 11
+\BOOKMARK [1][-]{section.3.2}{Neural Network}{chapter.3}% 12
+\BOOKMARK [0][-]{chapter.4}{Results}{}% 13
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 14
