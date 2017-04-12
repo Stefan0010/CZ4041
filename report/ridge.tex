@@ -1,0 +1,115 @@
+\section{Ridge Regression} \label{sc:ridge}
+
+\subsection{Background}
+Similarly with Lasso, Ridge regression is an extension of OLS with regularization term. The difference between Lasso and Ridge is the L-norm regularization. Instead of L1 norm, Ridge uses the L2 norm for its regularization term.
+\begin{equation}
+\label{eq:l2_regularization}
+\lambda \sum_{i=0}^{N} (w_i)^2
+\end{equation}
+The L2 regularization term is defined as the summation of the square of the weight for each features, multiplied by the penalty weight of $\lambda$ (default value 0.1). The L2 regularization term is included to the error term in OLS regression.
+
+\subsection{Implementation}
+The implementation of Ridge regression model is done using Scikit Learn Library in Python, along with supporting libraries such as Pandas and Numpy.
+
+\subsection{Preprocessing}
+The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding.\\
+Additionally, \textit{CompetitionDistance} feature is normalized using min-max normalization method. \textit{Customers} data is dropped from training set as it does not exist in the testing data. Furthermore, \textit{Date} feature is also dropped from training data as we want to ensure that all features are in the form of integer, boolean, or float.
+
+\subsection{Model Training \& Testing}
+Sales forecast is only done for open stores (i.e. \textit{Open} equals to true). For closed stores, the predicted sales value will be set to 0.
+
+\subsubsection{Normalized Train Test}
+In this method, \textit{Sales} data is normalized using global mean and standard deviation. The resulting predictions are denormalized using the same mean and standard deviation.
+By using a total of 20 features for training and testing, the result from Kaggle is summarized in table \ref{tab:ridge_norm_result}.
+\begin{table}[h]
+	\centering
+	\caption{Normalized Ridge Result}
+	\label{tab:ridge_norm_result}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.21149 \\ \hline
+		Public score  & 0.20215 \\ \hline
+	\end{tabular}
+\end{table}
+\\
+Following the experiment, further normalization is done by normalizing \textit{Sales} with regards to the mean and standard deviation of each store.
+\begin{table}[h]
+	\centering
+	\caption{Store Normalized Ridge Result}
+	\label{tab:ridge_norm_result_2}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.20079 \\ \hline
+		Public score  & 0.18565 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{Train Test per Store}
+Using the store-normalized \textit{Sales} data, we defined a specific Ridge model for each \textit{StoreId}. The result of this method can be observed in table \ref{tab:ridge_per_store_result}.
+\begin{table}[h]
+	\centering
+	\caption{Ridge Result per Store}
+	\label{tab:ridge_per_store_result}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.17369 \\ \hline
+		Public score  & 0.15602 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{K-Fold Cross Validation}
+To further improve the performance of Ridge regression, K-fold cross validation is used in the training phase.
+\\
+Using a 3-fold cross validation method, the model with best validation score is selected to predict the \textit{Sales} for each \textit{StoreId}. The result can be observed in table \ref{tab:ridge_3_fold}.
+\begin{table}[h]
+	\centering
+	\caption{3-Fold Validation Ridge Result}
+	\label{tab:ridge_3_fold}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.17637 \\ \hline
+		Public score  & 0.15988 \\ \hline
+	\end{tabular}
+\end{table}
+\\
+Increasing the number of fold to 5, the improvement of the prediction result can be seen in table \ref{tab:ridge_5_fold}.
+\begin{table}[h]
+	\centering
+	\caption{5-Fold Validation Ridge Result}
+	\label{tab:ridge_5_fold}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.17318 \\ \hline
+		Public score  & 0.15527 \\ \hline
+	\end{tabular}
+\end{table}
+\\
+Using 10 fold validation, the resulting score is shown in table \ref{tab:ridge_10_fold}.
+\begin{table}[h]
+	\centering
+	\caption{10-Fold Validation Ridge Result}
+	\label{tab:ridge_10_fold}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.17387 \\ \hline
+		Public score  & 0.15628 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{Extra Feature}
+asdasdas
+
+\begin{table}[h]
+	\centering
+	\caption{}
+	\label{}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0 \\ \hline
+		Public score  & 0 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{Variations of Penalty Weight ($\lambda$)}
+The experiments above are repeated using different $\lambda$ values, such as $10^{-15}$, $10^{-10}$, $10^{-8}$, $10^{-4}$, $10^{-3}$, 0.01, 1, 5, 10, 20.
+However, all variation of $\lambda$ produced similar or worse result compared with the default $\lambda$ value of 0.1.

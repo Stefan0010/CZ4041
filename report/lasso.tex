@@ -7,22 +7,25 @@ Lasso regression is an extension of Ordinary Least Square (OLS) regression. The 
 \label{eq:l1_regularization}
 \lambda \sum_{i=0}^{N} |w_i|
 \end{equation}
-The L1 regularization term is defined as the summation of the absolute of the weight for each features, multiplied by the penalty weight of $\lambda$. The L1 regularization term is included to the error term in OLS regression. The objective of defining a regularization term is to constraint the value of w in order to avoid overfitting the model
+The L1 regularization term is defined as the summation of the absolute of the weight for each features, multiplied by the penalty weight of $\lambda$ (default value 0.1). The L1 regularization term is included to the error term in OLS regression. The objective of defining a regularization term is to constraint the value of w in order to avoid overfitting the model.
 
 \subsection{Implementation}
 The implementation of Lasso regression model is done using Scikit Learn Library in Python, along with supporting libraries such as Pandas and Numpy.
 
-\subsection{Model Training \& Testing}
-During the training and testing phase, the Lasso model was trained with different training methods, and the difference was observed based on the model's performance in the competition leaderboard.
+\subsection{Preprocessing}
+The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding.\\
+Additionally, \textit{CompetitionDistance} feature is normalized using min-max normalization method. \textit{Customers} data is dropped from training set as it does not exist in the testing data. Furthermore, \textit{Date} feature is also dropped from training data as we want to ensure that all features are in the form of integer, boolean, or float.
 
-\subsubsection{Merged and Normalized Train Test}
-This phase trains the Lasso model using the preprocessed training and testing data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding.\\
-Additionally, the \textit{Sales} column is normalized (using global mean and standard deviation of \textit{Sales}) during training and denormalized during testing.\\
-The performance of this training type is measured with RMSPE according to Kaggle, as shown in table \ref{tab:lasso_merged_norm_result}
+\subsection{Model Training \& Testing}
+During the training and testing phase, the Lasso model was trained with different training methods, and the difference was observed based on the model's performance in the competition leaderboard. In addition, prediction is only done for open stores (i.e. \textit{Open} equals to true). For closed stores, the forecasted sales are defaulted to the value of 0.
+
+\subsubsection{Normalized Train Test}
+In this method, the \textit{Sales} column is normalized (using global mean and standard deviation of \textit{Sales}) during training and the testing result is denormalized. 
+By using 20 features for training and testing, the performance of this training type, measured with RMSPE by Kaggle, is shown in table \ref{tab:lasso_norm_result}
 \begin{table}[h]
 	\centering
-	\caption{Merged Normalized Lasso Result}
-	\label{tab:lasso_merged_norm_result}
+	\caption{Normalized Lasso Result}
+	\label{tab:lasso_norm_result}
 	\begin{tabular}{|m{100pt}|m{50pt}|}
 		\hline
 		Private score & 0.24082 \\ \hline
@@ -31,7 +34,7 @@ The performance of this training type is measured with RMSPE according to Kaggle
 \end{table}
 
 \subsubsection{Train Test per Store}
-The data used in this phase is the merged training and testing data from Section \ref{ch:preprocessing}. In addition, the \textit{Sales} data is normalized with regards to the mean and standard deviation of each store. Furthermore, a unique predictive model is defined for each store ID.\\
+In this experiment, the \textit{Sales} data is normalized with regards to the mean and standard deviation of each store instead of using global mean and standard deviation. Furthermore, a unique predictive model is defined for each \textit{StoreId}.\\
 The result of this model can be observed in table \ref{tab:lasso_result_per_store}.
 
 \begin{table}[h]
@@ -45,7 +48,7 @@ The result of this model can be observed in table \ref{tab:lasso_result_per_stor
 	\end{tabular}
 \end{table}
 
-\subsubsection{K-Fold Validation}
+\subsubsection{K-Fold Cross Validation}
 In addition to training and testing per store, this step performs a 5-fold validation on each predictive model during the training phase. Using the model with the best validation score, the model is then used to predict the sales of the respective store.
 
 \begin{table}[h]
@@ -58,3 +61,7 @@ In addition to training and testing per store, this step performs a 5-fold valid
 		Public score  & 0.25426 \\ \hline
 	\end{tabular}
 \end{table}
+
+\subsubsection{Variations of Penalty Weight ($\lambda$)}
+The experiments above are repeated using different $\lambda$ values, such as $10^{-15}$, $10^{-10}$, $10^{-8}$, $10^{-4}$, $10^{-3}$, 0.01, 1, 5, 10, 20.
+However, all variation of $\lambda$ produced similar or worse result compared with the default $\lambda$ value of 0.1.

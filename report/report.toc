@@ -13,9 +13,21 @@
 \contentsline {section}{\numberline {3.3}Lasso Regression}{7}{section.3.3}
 \contentsline {subsection}{\numberline {3.3.1}Background}{7}{subsection.3.3.1}
 \contentsline {subsection}{\numberline {3.3.2}Implementation}{7}{subsection.3.3.2}
-\contentsline {subsection}{\numberline {3.3.3}Model Training \& Testing}{7}{subsection.3.3.3}
-\contentsline {subsubsection}{Merged and Normalized Train Test}{7}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.3}Preprocessing}{7}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.4}Model Training \& Testing}{7}{subsection.3.3.4}
+\contentsline {subsubsection}{Normalized Train Test}{8}{subsection.3.3.4}
 \contentsline {subsubsection}{Train Test per Store}{8}{table.caption.7}
-\contentsline {subsubsection}{K-Fold Validation}{8}{table.caption.8}
-\contentsline {chapter}{\numberline {4}Results}{9}{chapter.4}
-\contentsline {chapter}{\numberline {5}Conclusion}{10}{chapter.5}
+\contentsline {subsubsection}{K-Fold Cross Validation}{8}{table.caption.8}
+\contentsline {subsubsection}{Variations of Penalty Weight ($\lambda $)}{9}{table.caption.9}
+\contentsline {section}{\numberline {3.4}Ridge Regression}{9}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Background}{9}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Implementation}{9}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}Preprocessing}{9}{subsection.3.4.3}
+\contentsline {subsection}{\numberline {3.4.4}Model Training \& Testing}{9}{subsection.3.4.4}
+\contentsline {subsubsection}{Normalized Train Test}{10}{subsection.3.4.4}
+\contentsline {subsubsection}{Train Test per Store}{10}{table.caption.11}
+\contentsline {subsubsection}{K-Fold Cross Validation}{10}{table.caption.12}
+\contentsline {subsubsection}{Extra Feature}{11}{table.caption.15}
+\contentsline {subsubsection}{Variations of Penalty Weight ($\lambda $)}{11}{table.caption.16}
+\contentsline {chapter}{\numberline {4}Results}{13}{chapter.4}
+\contentsline {chapter}{\numberline {5}Conclusion}{14}{chapter.5}
