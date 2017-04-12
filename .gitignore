@@ -98,3 +98,12 @@ ENV/
 !splitted.tar.gz
 *.pickle
 *.caffemodel
+report/*.aux
+report/*.log
+report/*.bbl
+report/*.blg
+report/*.lof
+report/*.out
+report/*.pdf
+report/*.synctex.gz
+report/*.toc
