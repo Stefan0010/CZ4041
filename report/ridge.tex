@@ -61,7 +61,7 @@ Using the store-normalized \textit{Sales} data, we defined a specific Ridge mode
 To further improve the performance of Ridge regression, K-fold cross validation is used in the training phase.
 \\
 Using a 3-fold cross validation method, the model with best validation score is selected to predict the \textit{Sales} for each \textit{StoreId}. The result can be observed in table \ref{tab:ridge_3_fold}.
-\begin{table}[h]
+\begin{table}[H]
 	\centering
 	\caption{3-Fold Validation Ridge Result}
 	\label{tab:ridge_3_fold}
@@ -71,9 +71,10 @@ Using a 3-fold cross validation method, the model with best validation score is 
 		Public score  & 0.15988 \\ \hline
 	\end{tabular}
 \end{table}
-\\
+
+\noindent
 Increasing the number of fold to 5, the improvement of the prediction result can be seen in table \ref{tab:ridge_5_fold}.
-\begin{table}[h]
+\begin{table}[H]
 	\centering
 	\caption{5-Fold Validation Ridge Result}
 	\label{tab:ridge_5_fold}
@@ -83,9 +84,10 @@ Increasing the number of fold to 5, the improvement of the prediction result can
 		Public score  & 0.15527 \\ \hline
 	\end{tabular}
 \end{table}
-\\
+
+\noindent
 Using 10 fold validation, the resulting score is shown in table \ref{tab:ridge_10_fold}.
-\begin{table}[h]
+\begin{table}[H]
 	\centering
 	\caption{10-Fold Validation Ridge Result}
 	\label{tab:ridge_10_fold}
@@ -97,16 +99,29 @@ Using 10 fold validation, the resulting score is shown in table \ref{tab:ridge_1
 \end{table}
 
 \subsubsection{Extra Feature}
-asdasdas
-
+This method performs a 5-fold validation on the previous dataset with additional features.
+\\
+Using a one hot encoding for \textit{DayOfWeek}, a total of 26 features are used for the predictive model.
 \begin{table}[h]
 	\centering
-	\caption{}
-	\label{}
+	\caption{Ridge Result with 26 Features}
+	\label{tab:ridge_extra_feature_1}
 	\begin{tabular}{|m{100pt}|m{50pt}|}
 		\hline
-		Private score & 0 \\ \hline
-		Public score  & 0 \\ \hline
+		Private score & 0.16308 \\ \hline
+		Public score  & 0.14370 \\ \hline
+	\end{tabular}
+\end{table}
+\\
+The historical data for \textit{Customers} and \textit{Sales} is used to derive additional features such as \textit{Customers\_Max, Customers\_Min, Customers\_Avg, Sales\_Max, Sales\_Min, Sales\_Avg}, where the additional features are relative to \textit{StoreId}. The result of using 32 features can be observed in table \ref{tab:ridge_extra_feature_2}.
+\begin{table}[h]
+	\centering
+	\caption{Ridge Result with 32 Features}
+	\label{tab:ridge_extra_feature_2}
+	\begin{tabular}{|m{100pt}|m{50pt}|}
+		\hline
+		Private score & 0.16309 \\ \hline
+		Public score  & 0.14367 \\ \hline
 	\end{tabular}
 \end{table}
 

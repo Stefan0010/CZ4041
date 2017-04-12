@@ -9,9 +9,10 @@
 \contentsline {table}{\numberline {3.6}{\ignorespaces Normalized Ridge Result\relax }}{10}{table.caption.10}
 \contentsline {table}{\numberline {3.7}{\ignorespaces Store Normalized Ridge Result\relax }}{10}{table.caption.11}
 \contentsline {table}{\numberline {3.8}{\ignorespaces Ridge Result per Store\relax }}{10}{table.caption.12}
-\contentsline {table}{\numberline {3.9}{\ignorespaces 3-Fold Validation Ridge Result\relax }}{11}{table.caption.13}
+\contentsline {table}{\numberline {3.9}{\ignorespaces 3-Fold Validation Ridge Result\relax }}{10}{table.caption.13}
 \contentsline {table}{\numberline {3.10}{\ignorespaces 5-Fold Validation Ridge Result\relax }}{11}{table.caption.14}
-\contentsline {table}{\numberline {3.11}{\ignorespaces 10-Fold Validation Ridge Result\relax }}{12}{table.caption.15}
-\contentsline {table}{\numberline {3.12}{\ignorespaces \relax }}{12}{table.caption.16}
+\contentsline {table}{\numberline {3.11}{\ignorespaces 10-Fold Validation Ridge Result\relax }}{11}{table.caption.15}
+\contentsline {table}{\numberline {3.12}{\ignorespaces Ridge Result with 26 Features\relax }}{11}{table.caption.16}
+\contentsline {table}{\numberline {3.13}{\ignorespaces Ridge Result with 32 Features\relax }}{11}{table.caption.17}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
