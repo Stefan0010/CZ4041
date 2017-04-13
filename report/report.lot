@@ -14,5 +14,7 @@
 \contentsline {table}{\numberline {3.11}{\ignorespaces 10-Fold Validation Ridge Result\relax }}{11}{table.caption.15}
 \contentsline {table}{\numberline {3.12}{\ignorespaces Ridge Result with 26 Features\relax }}{11}{table.caption.16}
 \contentsline {table}{\numberline {3.13}{\ignorespaces Ridge Result with 32 Features\relax }}{11}{table.caption.17}
+\contentsline {table}{\numberline {3.14}{\ignorespaces XGBoost result\relax }}{13}{table.caption.18}
 \addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Model Results\relax }}{14}{table.caption.19}
 \addvspace {10\p@ }
