@@ -96,6 +96,7 @@ ENV/
 *./src/normalise_with_val_std_perstore.py
 !merged.tar.gz
 !splitted.tar.gz
+!rf_submission.csv
 *.pickle
 *.caffemodel
 report/*.aux

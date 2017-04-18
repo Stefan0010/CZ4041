@@ -9,7 +9,7 @@ Random Forest Regressor was implemented by using Python scikit-learn library alo
 
 \subsection{Preprocessing}
 The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment, DaysOfWeek} are all converted into one hot encoding.\\
-We experimented on two different kind of normalization. The first one is by normalizing all features using the standard deviation and mean of each store. The second one is by converting \textit{Sales} column to its logarithmic plus one value.  
+We experimented on two different kind of normalization. The first one is by normalizing all features using the standard deviation and mean of each store. The second one is by converting \textit{Sales} column to its logarithmic value.  
 
 \subsection{Model Training \& Testing}
 Each store was trained and tested independently from each other. We split the training data into training data and validation data with ratio of 50:50 and 80:20 to see the difference in their performance. 
@@ -29,8 +29,8 @@ In this method, we normalized all features using the standard deviation and mean
 	\end{tabular}
 \end{table}
 
-\subsubsection{Converted Sales to Its Logarithmic Plus One Value}
-In this experiment, we use logarithm plus one formula to reduce the sensitivity of   \textit{Sales} to change.  
+\subsubsection{Converted Sales to Its Logarithmic Value}
+In this experiment, we use logarithm formula to reduce the sensitivity of   \textit{Sales} to change. Plus one was added so that the logarithmic value of \textit{Sales} would be 0 when the real value was 0.
 \begin{equation}
 \label{eq:logarithm plus one}
 Sales = \ln (Sales + 1)
