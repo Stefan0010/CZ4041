@@ -5,9 +5,9 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import LabelBinarizer
 
 testing = "../data/test_merged.csv"
-training = "../data/train_merged.csv"
+training = "../../data/train_merged.csv"
 
-tr_df= pd.read_csv(testing)
+tr_df= pd.read_csv(training)
 dow = tr_df.as_matrix(["DayOfWeek"]).astype(int)
 row = len(tr_df)
 print dow[1]
@@ -25,5 +25,5 @@ for day in c:
 	i = c.index(day)
 	tr_df[day] = pd.DataFrame(onecode[:,i], columns = [day])
 
-tr_df.to_csv(testing, encoding="utf-8")
+tr_df.to_csv(training, encoding="utf-8", index=False)
 

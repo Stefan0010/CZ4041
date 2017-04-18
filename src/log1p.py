@@ -13,7 +13,7 @@ testing = "../data/test_merged.csv"
 training = "../data/train_merged.csv"
 
 
-cols = ["Store", "Open", "Promo", "SchoolHoliday"]
+cols = ["Open", "Promo", "SchoolHoliday"]
 cols += ["StateHoliday_0", "StateHoliday_a", "StateHoliday_b"]
 cols += ["StateHoliday_c", "Weekends", "Weekdays", "StoreType_a", "StoreType_b"]
 cols += ["StoreType_c", "StoreType_d", "Assortment_a", "Assortment_b", "Assortment_c"]
@@ -30,36 +30,28 @@ col = len(cols)+len(colsRes)
 column = cols + colsRes
 col2 = ["toWrite"] + column
 
-rmspe = list()
-rmspe2 = list()
 
 """normalize training data"""
 for store in stores:                    #for each store
     print store
     train_df = pd.read_csv(training)
     train = train_df.loc[train_df["Store"] == store]
-    trainArr = train.as_matrix(column)
+    date = pd.to_datetime(train['Date'], format="%d/%m/%Y")
+    month = date.dt.month
+    year = date.dt.year
+    trainArr = train.as_matrix(cols)   #without sales
+    trainSales = train.as_matrix(colsRes)
     trainArr = trainArr.astype(int)
-    #store = np.empty((len(trainArr),1))
-    #store.fill(i)
-    toWrite = np.zeros((len(trainArr),1))
-    #toWrite = np.column_stack((toWrite, store))
+    trainArr = np.column_stack((trainArr, month, year))
+
     if len(trainArr)>0:
-        for j in range(1,len(trainArr[0])):   #for each column, store column excluded
-            #temp = []
-            z=[]
-            n=[]
-            z = trainArr[:,j].astype(float)
-            std = np.std(z)
-            mean = np.mean(z)
-            n = np.divide(np.subtract(z, mean), std)
-            n = np.nan_to_num(n)
-            toWrite = np.column_stack((toWrite, n))
-        #df = pd.DataFrame(toWrite, columns=col2)
-        #df.to_csv('normalised_data.csv', mode='a')
+        z=[]
+        z=trainSales.astype(float)
+        log=np.log1p(z)
     else:
         continue
-
+    toWrite = trainArr[:, :]
+    print len(toWrite[0])
     print "use all training data"
     print "----------------------------------"
     print "training"
@@ -69,12 +61,12 @@ for store in stores:                    #for each store
     tw_len = len(toWrite)
     tr = 4*tw_len//5
     rf = RandomForestRegressor(n_estimators=100, max_depth=30)
-    rf.fit(toWrite[:tr,1:26], toWrite[:tr,27])
+    rf.fit(toWrite[:tr, :], log[:tr])
 
     """validating data"""
     print "validating 20 percent of data"
     print "----------------------------------"
-    val_result = rf.predict(toWrite[tr:, 1:26])
+    val_result = rf.predict(toWrite[tr:, :])
 
     """normalise testing data"""
     print "normalise testing data"
@@ -87,40 +79,26 @@ for store in stores:                    #for each store
     
     testArr = test.as_matrix(cols)
     colID = test.as_matrix(["Id"]).astype(int)
-    #print colID
     testArr = testArr.astype(int)
-    toTest = np.zeros((len(testArr),1))
-    for k in range(1, len(testArr[0])):
-        z2=[]
-        n2=[]
-        z2 = testArr[:,k].astype(float)
-        mean2 = np.mean(z2)
-        std2 = np.std(z2)
-        n2 = np.divide(np.subtract(z2, mean2), std2)
-        n2 = np.nan_to_num(n2)
 
-        toTest = np.column_stack((toTest, n2))
+    date_test = pd.to_datetime(test['Date'], format="%d/%m/%Y")
+    month_test = date_test.dt.month
+    year_test = date_test.dt.year
+    testArr = np.column_stack((testArr, month_test, year_test))
+    print len(testArr[0])
 
-    #toTest = np.column_stack((colID, toTest))
     print "predict testing data"
     print "----------------------------------"
-    results = rf.predict(toTest[:,1:26])
-    #results = rf.predict(toWrite[tr:,1:19])
+    results = rf.predict(testArr)
 
-    res = train.as_matrix(colsRes)
-
-    mean3 = np.mean(res)
-    std3 = np.std(res)
-    results_d = np.add(np.multiply(results, std3), mean3)
+    results_d = np.expm1(results)
     withID = np.column_stack((colID, results_d))
-    #print withID
+
 
     print "write to result1"
     print "----------------------------------"
     df = pd.DataFrame(withID, columns = ["Id", "Sales"])
-    df.to_csv('result1_n100.csv', mode='a')
-
-    #print results_d
+    df.to_csv('result1_log_with_month.csv', mode='a', index=False)
 
     """use half of training data"""
     print "use half of training data"
@@ -128,33 +106,27 @@ for store in stores:                    #for each store
     tr2 = tw_len//2
 
     rf2 = RandomForestRegressor(n_estimators=100, max_depth = 30)
-    rf2.fit(toWrite[:tr2,1:26], toWrite[:tr2,27])
+    rf2.fit(toWrite[:tr2,:], log[:tr2])
 
     """validating data with 50 percent of data"""
     print "validating 50 percent of data"
     print "----------------------------------"
 
-    val_result2 = rf2.predict(toWrite[tr2:, 1:26])
+    val_result2 = rf2.predict(toWrite[tr2:, :])
 
     """predict testing data"""
     print "predict testing data"
     print "----------------------------------"
 
-    results2 = rf2.predict(toTest[:,1:26])
-
-    res2 = train.as_matrix(colsRes)
-    mean4 = np.mean(res2)
-    std4 = np.std(res2)
-
-    results_d2 = np.add(np.multiply(results2, std4), mean4)
+    results2 = rf2.predict(testArr)
+    results_d2 = np.expm1(results2)
 
     withID2 = np.column_stack((colID, results_d2))
-    #print withID2
 
     print "write to result2"
     print "----------------------------------"
 
     df2 = pd.DataFrame(withID2, columns = ["Id", "Sales"])
-    df2.to_csv('result2_n100.csv', mode='a')
+    df2.to_csv('result2_log_with_month.csv', mode='a', index=False)
 
 

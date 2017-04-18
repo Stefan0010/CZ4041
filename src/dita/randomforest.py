@@ -29,7 +29,7 @@ test = test.astype(int)
 
 
 #rf = RandomForestRegressor(n_estimators = 200, max_features= 0.7, max_depth = 20)
-rf = ElasticNet()
+rf = RandomForestRegressor(n_estimators=100, max_depth=30)
 rf.fit(train, trainRes.ravel())
 
 results = rf.predict(test)

@@ -1,6 +1,6 @@
 \chapter{Results}
 In this chapter, we will explain more about the results of all of the models that are used to train Rossmann store sales data. 
-First, LSTM per store model yields $0.15578$ for private score, and $0.15904$ for public score. Next, Neural network model produces $0.20356$ for private score, and $0.20298$ for public score. Then, Lasso model gives the best RMSPE result when it is trained per store, instead globally trained. It yield $0.23920$ as private score, and $0.23479$ as public score. Ridge produces the best result when using 5-fold cross validation with 32 features. It yield $0.16309$ for private score and $0.14367$ for public score. Random forests has the best RMSPE result with 5:5 ratio for training and validation data. It produces $0.15703$ for private score, and $0.14604$ for public score. As a comparison, XGBoost model gives $0.12128$ as private score, and $0.10986$ for public score. Full result scores can be seen in table \ref{tab:result}.
+First, LSTM per store model yields $0.15578$ for private score, and $0.15904$ for public score. Next, Neural network model produces $0.20356$ for private score, and $0.20298$ for public score. Then, Lasso model gives the best RMSPE result when it is trained per store, instead globally trained. It yield $0.23920$ as private score, and $0.23479$ as public score. Ridge produces the best result when using 5-fold cross validation with 32 features. It yields $0.16309$ for private score and $0.14367$ for public score. Random forests has the best RMSPE result with 50:50 ratio for training and validation data. It produces $0.15588$ for private score, and $0.14221$ for public score. As a comparison, XGBoost model gives $0.12128$ as private score, and $0.10986$ for public score. Full result scores can be seen in table \ref{tab:result}.
 \begin{table}[H]
 	\centering
 	\caption{Model Results}
@@ -12,7 +12,7 @@ First, LSTM per store model yields $0.15578$ for private score, and $0.15904$ fo
 		NN & 0.20356 & 0.23479 \\ \hline
 		Lasso & 0.23920 & 0.15904 \\ \hline
 		Ridge & 0.16309 & 0.14367 \\ \hline
-		Random forest & 0.15703 & 0.14604 \\ \hline
+		Random forest & 0.15588 & 0.14221 \\ \hline
 		XGboost & 0.12128 & 0.10986 \\ \hline
 	\end{tabular}
 \end{table}

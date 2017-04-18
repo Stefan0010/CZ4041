@@ -21,5 +21,10 @@
 \BOOKMARK [2][-]{subsection.3.4.3}{Preprocessing}{section.3.4}% 21
 \BOOKMARK [2][-]{subsection.3.4.4}{Model Training \046 Testing}{section.3.4}% 22
 \BOOKMARK [1][-]{section.3.5}{XGBoost}{chapter.3}% 23
-\BOOKMARK [0][-]{chapter.4}{Results}{}% 24
-\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 25
+\BOOKMARK [1][-]{section.3.6}{Random Forest Regressor}{chapter.3}% 24
+\BOOKMARK [2][-]{subsection.3.6.1}{Background}{section.3.6}% 25
+\BOOKMARK [2][-]{subsection.3.6.2}{Implementation}{section.3.6}% 26
+\BOOKMARK [2][-]{subsection.3.6.3}{Preprocessing}{section.3.6}% 27
+\BOOKMARK [2][-]{subsection.3.6.4}{Model Training \046 Testing}{section.3.6}% 28
+\BOOKMARK [0][-]{chapter.4}{Results}{}% 29
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 30

@@ -1,0 +1,53 @@
+\section{Random Forest Regressor} \label{sec:rf}
+The last algorithm that we explored was Random Forest Regressor.
+
+\subsection{Background}
+Random Forest Regressor is a machine learning algorithm that constructs a number of decision trees and generates the mean prediction of each tree. The result of each tree will then be averaged over the number of trees. This averaged result is the final prediction of the regressor. 
+
+\subsection{Implementation}
+Random Forest Regressor was implemented by using Python scikit-learn library along with other libraries such as numpy and pandas.
+
+\subsection{Preprocessing}
+The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment, DaysOfWeek} are all converted into one hot encoding.\\
+We experimented on two different kind of normalization. The first one is by normalizing all features using the standard deviation and mean of each store. The second one is by converting \textit{Sales} column to its logarithmic plus one value.  
+
+\subsection{Model Training \& Testing}
+Each store was trained and tested independently from each other. We split the training data into training data and validation data with ratio of 50:50 and 80:20 to see the difference in their performance. 
+
+\subsubsection{Normalized Train Test with Standard Deviation}
+In this method, we normalized all features using the standard deviation and mean of its corresponding store. All preprocessed features, which were 26 in total, were used. The results are summarized in table \ref{tab:random_forest_result_1}.
+
+\begin{table}[h]
+	\centering
+	\caption{Normalized Random Forest Result }
+	\label{tab:random_forest_result_1}
+	\begin{tabular}{|m{150pt}|m{50pt}|m{50pt}|}
+		\hline
+		\textbf{Train:Validation}& \textbf{80:20}& \textbf{50:50}  \\ \hline
+		Private score & 0.15812 & 0.15701  \\ \hline
+		Public score  & 0.14692 & 0.14632\\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{Converted Sales to Its Logarithmic Plus One Value}
+In this experiment, we use logarithm plus one formula to reduce the sensitivity of   \textit{Sales} to change.  
+\begin{equation}
+\label{eq:logarithm plus one}
+Sales = \ln (Sales + 1)
+\end{equation}
+The equation above is implemented using numpy \textit{np.log1p} function.
+The result of this model can be observed in table and \ref{tab:rf_log_2}.
+\begin{table}[h]
+	\centering
+	\caption{Random Forest Result with Logarithm Plus One}
+	\label{tab:rf_log_2}
+	\begin{tabular}{|m{150pt}|m{50pt}|m{50pt}|}
+		\hline
+		\textbf{Train:Validation}&\textbf{80:20}&\textbf{50:50} \\ \hline
+		Private score & 0.15588 & 0.15621 \\ \hline
+		Public score  & 0.14224 & 0.14338 \\ \hline
+	\end{tabular}
+\end{table}
+
+
+

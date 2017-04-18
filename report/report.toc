@@ -30,5 +30,12 @@
 \contentsline {subsubsection}{Extra Feature}{11}{table.caption.15}
 \contentsline {subsubsection}{Variations of Penalty Weight ($\lambda $)}{11}{table.caption.17}
 \contentsline {section}{\numberline {3.5}XGBoost}{12}{section.3.5}
-\contentsline {chapter}{\numberline {4}Results}{14}{chapter.4}
-\contentsline {chapter}{\numberline {5}Conclusion}{15}{chapter.5}
+\contentsline {section}{\numberline {3.6}Random Forest Regressor}{13}{section.3.6}
+\contentsline {subsection}{\numberline {3.6.1}Background}{13}{subsection.3.6.1}
+\contentsline {subsection}{\numberline {3.6.2}Implementation}{13}{subsection.3.6.2}
+\contentsline {subsection}{\numberline {3.6.3}Preprocessing}{13}{subsection.3.6.3}
+\contentsline {subsection}{\numberline {3.6.4}Model Training \& Testing}{13}{subsection.3.6.4}
+\contentsline {subsubsection}{Normalized Train Test with Standard Deviation}{14}{subsection.3.6.4}
+\contentsline {subsubsection}{Converted Sales to Its Logarithmic Plus One Value}{14}{table.caption.19}
+\contentsline {chapter}{\numberline {4}Results}{15}{chapter.4}
+\contentsline {chapter}{\numberline {5}Conclusion}{16}{chapter.5}
