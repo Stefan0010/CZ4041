@@ -123,7 +123,7 @@ def predict():
         df2.to_csv('result2.csv', mode='a', index=False)
 
 def sort_result():
-    df = pd.read_csv('result1_log_with_month.csv')
+    df = pd.read_csv('result1.csv')
     result = df.loc[df["Id"] != 'Id'] 
     Id = result.as_matrix(["Id"])
     Id = list(Id.flatten())
@@ -136,7 +136,7 @@ def sort_result():
     write["Id"] = write["Id"].astype(int)
     write.to_csv("result1.csv", encoding="utf-8", index=False)
 
-    df2 = pd.read_csv('result2_log_with_month.csv')
+    df2 = pd.read_csv('result2.csv')
     result2 = df2.loc[df["Id"] != 'Id']
     Id2 = result2.as_matrix(["Id"])
     Id2 = list(Id2.flatten())
