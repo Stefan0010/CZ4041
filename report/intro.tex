@@ -22,13 +22,27 @@ To assist with the challenge, Rossmann has also provided 4 types of comma-separa
 However, only \textit{train.csv, test.csv, store.csv} are used in this project.
 
 \section{Evaluation Score}
-Random Forest model:\\
-Private score = $0.14692$\\
-Private score rank = 2172 out of 3303\\
-Public score = $0.13378$\\
-Public score rank = 2128 out of 3303\\ \\
-XGBoost model (for comparison):\\
-Private score = $0.11677$\\
-Private score rank = 242 out of 3303\\
-Public score = $0.10437$\\
-Public score rank = 778 out of 3303\\
+We have attempted to solve this problem with a few models, including LSTM, neural network, LASSO, ridge regression, and random forest. Out of these models, random forest gives the best evaluation score. The evaluation score of our random forest model can be found in table \ref{tab:evaluation_score_our_model}.
+\begin{table}[h]
+	\centering
+	\caption{Performance of our best model, Random Forest}
+	\label{tab:evaluation_score_our_model}
+	\begin{tabular}{l|l|l|}
+		\cline{2-3}
+		& Score   & Rank             \\ \hline
+		\multicolumn{1}{|l|}{Private} & 0.14692 & 2172 out of 3303 \\ \hline
+		\multicolumn{1}{|l|}{Public}  & 0.13378 & 2128 out of 3303 \\ \hline
+	\end{tabular}
+\end{table} \\
+We also attempt to replicate the solution from someone placed 13th in the leaderboard. It should be noted that we do not use this as our official solution. Hence, the score should be ignored from grading. The details of the solution can be found \href{https://starcraft.com/en-us/articles/20674424}{here}. The performance of the replicated solution can be found in table \ref{tab:evaluation_score_best_model}.
+\begin{table}[h]
+\centering
+\caption{Performance of replicated solution, XGBoost}
+\label{tab:evaluation_score_best_model}
+\begin{tabular}{l|l|l|}
+	\cline{2-3}
+	& Score   & Rank            \\ \hline
+	\multicolumn{1}{|l|}{Private} & 0.11677 & 242 out of 3303 \\ \hline
+	\multicolumn{1}{|l|}{Public}  & 0.10437 & 778 out of 3303 \\ \hline
+\end{tabular}
+\end{table}
