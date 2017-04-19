@@ -52,14 +52,14 @@ def rmspe_xg(yhat, y):
 
 nrows = None
 
-df_train = pd.read_csv('data/train.csv', 
+df_train = pd.read_csv('../data//train.csv', 
                        nrows=nrows,
                        parse_dates=['Date'],
                        date_parser=(lambda dt: pd.to_datetime(dt, format='%Y-%m-%d')))
 
 nrows = nrows
 
-df_submit = pd.read_csv('data/test.csv', 
+df_submit = pd.read_csv('../data/test.csv', 
                         nrows=nrows,
                         parse_dates=['Date'],
                         date_parser=(lambda dt: pd.to_datetime(dt, format='%Y-%m-%d')))
@@ -105,7 +105,7 @@ features_x.append(var_name + 'DayOfYear')
 
 df['DateInt'] = df['Date'].astype(np.int64)
 
-df_store = pd.read_csv('data/store.csv', 
+df_store = pd.read_csv('../data/store.csv', 
                        nrows=nrows)
 
 ### Convert Storetype and Assortment to numerical categories
@@ -250,4 +250,4 @@ df_ypred['Id'] = df_ypred['Id'].astype('int')
 # Scale back the sales a bit
 df_ypred['Sales'] = (np.exp(ypred_bst) - 1) * 0.985
 df_ypred.sort_values('Id', inplace=True)
-df_ypred[['Id', 'Sales']].to_csv('rossmann_no_correction_scaled_another_Feat.csv', index=False)
+df_ypred[['Id', 'Sales']].to_csv('../data/rossmann_no_correction_scaled_another_Feat.csv', index=False)
