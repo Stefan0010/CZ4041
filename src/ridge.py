@@ -73,29 +73,6 @@ def evaluate():
 
 	return True
 
-def predictPre():
-	with open ('../data/dset_ridge.pickle', 'rb') as file:
-		d = pickle.load(file)
-
-	model = linear_model.Ridge(alpha=1.0)
-	model.fit(d['xtrain'], d['ytrain'])
-
-	y_pred = model.predict(d['xtest'])
-	y_pred_denorm = (y_pred * d['std']) + d['mean']
-
-	result = np.c_[d['submid'], y_pred_denorm]
-
-	for i in d['closed']:
-		result = np.vstack((result, [i, float(0)]))
-
-	result = result[result[:,0].argsort()]
-	result = pd.DataFrame(result)
-	result[0] = result[0].astype(int)
-
-	result.to_csv('../data/ridge_result_pre_2.csv', header=['Id', 'Sales'], index=False)
-
-	return True
-
 def preProcess(tr, ts):
 	# day of week feature
 	# greatly improve
@@ -116,20 +93,18 @@ def preProcess(tr, ts):
 	ts.insert(len(ts.columns), 'Sunday', ts['DayOfWeek'] == 7)
 
 	# date feature
-	# ---- doesnt improve anth ----
-	# tr.insert(len(tr.columns), 'Date_Norm', (tr['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
-	# tr.insert(len(tr.columns), 'Day_Norm', (tr['Date'].dt.day - 1.) / 31.)
-	# tr.insert(len(tr.columns), 'Month_Norm', (tr['Date'].dt.month - 1.) / 12.)
-	# tr.insert(len(tr.columns), 'Year_Norm', (tr['Date'].dt.year - 2013.) / 2.)
+	tr.insert(len(tr.columns), 'Date_Norm', (tr['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
+	tr.insert(len(tr.columns), 'Day_Norm', (tr['Date'].dt.day - 1.) / 31.)
+	tr.insert(len(tr.columns), 'Month_Norm', (tr['Date'].dt.month - 1.) / 12.)
+	tr.insert(len(tr.columns), 'Year_Norm', (tr['Date'].dt.year - 2013.) / 2.)
 
-	# ts.insert(len(ts.columns), 'Date_Norm', (ts['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
-	# ts.insert(len(ts.columns), 'Day_Norm', (ts['Date'].dt.day - 1.) / 31.)
-	# ts.insert(len(ts.columns), 'Month_Norm', (ts['Date'].dt.month - 1.) / 12.)
-	# ts.insert(len(ts.columns), 'Year_Norm', (ts['Date'].dt.year - 2013.) / 2.)
+	ts.insert(len(ts.columns), 'Date_Norm', (ts['Date'] - date_min) / np.timedelta64(1, 'D') / date_normer)
+	ts.insert(len(ts.columns), 'Day_Norm', (ts['Date'].dt.day - 1.) / 31.)
+	ts.insert(len(ts.columns), 'Month_Norm', (ts['Date'].dt.month - 1.) / 12.)
+	ts.insert(len(ts.columns), 'Year_Norm', (ts['Date'].dt.year - 2013.) / 2.)
 
-	# ---- doesnt improve anth ----
-	# tr.insert(len(tr.columns), 'Timestamp', pd.to_datetime(tr['Date']).values.astype(int))
-	# ts.insert(len(ts.columns), 'Timestamp', pd.to_datetime(ts['Date']).values.astype(int))
+	tr.insert(len(tr.columns), 'Timestamp', pd.to_datetime(tr['Date']).values.astype(int))
+	ts.insert(len(ts.columns), 'Timestamp', pd.to_datetime(ts['Date']).values.astype(int))
 
 	store_ids = tr['Store'].unique().astype(int, copy=False)
 
@@ -243,7 +218,7 @@ def trainKFold(dtrain, k):
 	# return model with best score
 	return models[scores.index(max(scores))]
 
-def predictPerStore():
+def predictPerStore(k):
 	# initialize result array
 	result = np.zeros(shape=(41088,2))
 
@@ -259,7 +234,6 @@ def predictPerStore():
 		
 		# train using kfold
 		print('training for store id : {}'.format(i))
-		k = 5
 		model = trainKFold(d_tr, k)
 
 		# predict
@@ -299,6 +273,6 @@ def predictPerStore():
 	
 	result = pd.DataFrame(result)
 	result[0] = result[0].astype(int)
-	result.to_csv('../data/ridge_result_per_store_5_fold_6.csv', header=['Id', 'Sales'], index=False)
+	result.to_csv('../data/ridge_result.csv', header=['Id', 'Sales'], index=False)
 
 	return True
