@@ -12,7 +12,7 @@ The L2 regularization term is defined as the summation of the square of the weig
 The implementation of Ridge regression model is done using Scikit Learn Library in Python, along with supporting libraries such as Pandas and Numpy.
 
 \subsection{Preprocessing}
-The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding.\\
+The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding. \\ \\
 Additionally, \textit{CompetitionDistance} feature is normalized using min-max normalization method. \textit{Customers} data is dropped from training set as it does not exist in the testing data. Furthermore, \textit{Date} feature is also dropped from training data as we want to ensure that all features are in the form of integer, boolean, or float.
 
 \subsection{Model Training \& Testing}
@@ -58,8 +58,7 @@ Using the store-normalized \textit{Sales} data, we defined a specific Ridge mode
 \end{table}
 
 \subsubsection{K-Fold Cross Validation}
-To further improve the performance of Ridge regression, K-fold cross validation is used in the training phase.
-\\
+To further improve the performance of Ridge regression, K-fold cross validation is used in the training phase. \\ \\
 Using a 3-fold cross validation method, the model with best validation score is selected to predict the \textit{Sales} for each \textit{StoreId}. The result can be observed in table \ref{tab:ridge_3_fold}.
 \begin{table}[H]
 	\centering
@@ -73,7 +72,7 @@ Using a 3-fold cross validation method, the model with best validation score is 
 \end{table}
 
 \noindent
-Increasing the number of fold to 5, the improvement of the prediction result can be seen in table \ref{tab:ridge_5_fold}.
+By increasing the number of fold to 5, the improvement of the prediction result can be seen in table \ref{tab:ridge_5_fold}.
 \begin{table}[H]
 	\centering
 	\caption{5-Fold Validation Ridge Result}
@@ -99,8 +98,7 @@ Using 10 fold validation, the resulting score is shown in table \ref{tab:ridge_1
 \end{table}
 
 \subsubsection{Extra Feature}
-This method performs a 5-fold validation on the previous dataset with additional features.
-\\
+This method performs a 5-fold validation on the previous dataset with additional features. \\ \\
 Using a one hot encoding for \textit{DayOfWeek}, a total of 26 features are used for the predictive model.
 \begin{table}[h]
 	\centering

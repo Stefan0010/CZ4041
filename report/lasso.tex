@@ -13,7 +13,8 @@ The L1 regularization term is defined as the summation of the absolute of the we
 The implementation of Lasso regression model is done using Scikit Learn Library in Python, along with supporting libraries such as Pandas and Numpy.
 
 \subsection{Preprocessing}
-The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding.\\
+The data used in this experiment is derived from preprocessed data in chapter \ref{ch:preprocessing} of this report, where \textit{StateHoliday, Storetype, Assortment} are all converted into one hot encoding. \\ \\
+
 Additionally, \textit{CompetitionDistance} feature is normalized using min-max normalization method. \textit{Customers} data is dropped from training set as it does not exist in the testing data. Furthermore, \textit{Date} feature is also dropped from training data as we want to ensure that all features are in the form of integer, boolean, or float.
 
 \subsection{Model Training \& Testing}

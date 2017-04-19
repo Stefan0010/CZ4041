@@ -108,3 +108,4 @@ report/*.out
 report/*.pdf
 report/*.synctex.gz
 report/*.toc
+report/report.pdf
