@@ -105,7 +105,6 @@ report/*.bbl
 report/*.blg
 report/*.lof
 report/*.out
-report/*.pdf
 report/*.synctex.gz
 report/*.toc
 report/report.pdf
